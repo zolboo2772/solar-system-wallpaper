@@ -16,7 +16,8 @@ out vec3 v_worldPosition;
 out vec3 v_normal;
 out vec2 v_texCoord;
 out vec3 v_viewDir;
-out mat3 v_tbn;
+out vec3 v_tangent;
+out vec3 v_bitangent;
 
 void main() {
     vec4 worldPos = u_modelMatrix * vec4(a_position, 1.0);
@@ -28,8 +29,9 @@ void main() {
     T = normalize(T - dot(T, N) * N);
     vec3 B = cross(N, T) * a_tangent.w;
 
-    v_tbn = mat3(T, B, N);
     v_normal = N;
+    v_tangent = T;
+    v_bitangent = B;
     v_viewDir = u_cameraPosition - v_worldPosition;
 
     gl_Position = u_projectionMatrix * u_viewMatrix * worldPos;

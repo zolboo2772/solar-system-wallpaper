@@ -33,35 +33,31 @@ jobs:
 
     - name: Rename APK for Release
       run: |
-        cp app/build/outputs/apk/debug/app-debug.apk SolarSystemWallpaper-v1.0.0.apk
+        cp app/build/outputs/apk/debug/app-debug.apk SolarSystemWallpaper-v1.0.1.apk
 
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
       with:
-        name: SolarSystemWallpaper-v1.0.0-APK
-        path: SolarSystemWallpaper-v1.0.0.apk
+        name: SolarSystemWallpaper-v1.0.1-APK
+        path: SolarSystemWallpaper-v1.0.1.apk
         retention-days: 30
 
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v2
       if: github.ref == 'refs/heads/main'
       with:
-        tag_name: v1.0.0
-        name: Solar System Live Wallpaper v1.0.0
+        tag_name: v1.0.1
+        name: Solar System Live Wallpaper v1.0.1 (Hotfix)
         body: |
-          ### 🪐 Solar System Live Wallpaper v1.0.0 (Samsung Galaxy S25 Ultra)
+          ### 🪐 Solar System Live Wallpaper v1.0.1 (Black Screen Fix)
           
-          Interactive 3D Solar System live wallpaper rendered with OpenGL ES 3.2 and PBR shaders.
+          This update fixes the black screen issue:
+          - ✅ Forwarded `surfaceCreated`, `surfaceChanged`, and `surfaceDestroyed` callbacks to `GLSurfaceView` in the wallpaper engine.
+          - ✅ Added interactive live 3D solar system preview directly inside the main app screen.
+          - ✅ High-performance single-pass starfield skybox (eliminating heavy nested fragment shader loops).
+          - ✅ Cross-GPU compatible TBN normal vector interpolation.
+          - ✅ High precision GLSL float configuration.
           
-          #### Features:
-          - Realistic PBR lighting on all 8 planets + Sun
-          - Atmospheric rim scattering (Earth, Venus, Mars, Uranus, Neptune)
-          - Earth night-side city lights + dynamic cloud layer
-          - Saturn rings with planetary shadow projection
-          - Procedural solar corona flares & twinkling 3D starfield skybox
-          - Interactive touch: orbit swipe, pinch-zoom, tap-to-focus planet HUD
-          - 60 FPS LTPO display support + zero background battery drain
-          
-          Download the APK below and install it directly on your device.
-        files: SolarSystemWallpaper-v1.0.0.apk
+          Download the updated APK below.
+        files: SolarSystemWallpaper-v1.0.1.apk
         token: ${{ secrets.GITHUB_TOKEN }}

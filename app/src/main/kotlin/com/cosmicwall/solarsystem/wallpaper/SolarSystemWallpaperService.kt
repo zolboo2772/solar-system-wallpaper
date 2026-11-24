@@ -1,5 +1,7 @@
 package com.cosmicwall.solarsystem.wallpaper
 
+import android.content.Context
+import android.opengl.GLSurfaceView
 import android.service.wallpaper.WallpaperService
 import android.view.MotionEvent
 import android.view.SurfaceHolder
@@ -18,7 +20,6 @@ class SolarSystemWallpaperService : WallpaperService() {
         private var glSurfaceView: WallpaperGLSurfaceView? = null
         private var renderer: SolarSystemRenderer? = null
         private var touchHandler: TouchHandler? = null
-        private var rendererSet = false
 
         override fun onCreate(surfaceHolder: SurfaceHolder) {
             super.onCreate(surfaceHolder)
@@ -37,20 +38,36 @@ class SolarSystemWallpaperService : WallpaperService() {
             }
 
             glSurfaceView = WallpaperGLSurfaceView(applicationContext).apply {
-                setSurfaceHolder(surfaceHolder)
                 setEGLContextClientVersion(3)
-                setEGLConfigChooser(8, 8, 8, 8, 24, 0)
+                setEGLConfigChooser(true)
+                setPreserveEGLContextOnPause(true)
                 setRenderer(ren)
-                renderMode = android.opengl.GLSurfaceView.RENDERMODE_CONTINUOUSLY
+                renderMode = GLSurfaceView.RENDERMODE_CONTINUOUSLY
             }
+        }
 
-            rendererSet = true
+        override fun onSurfaceCreated(holder: SurfaceHolder) {
+            super.onSurfaceCreated(holder)
+            glSurfaceView?.surfaceCreated(holder)
+        }
+
+        override fun onSurfaceChanged(
+            holder: SurfaceHolder,
+            format: Int,
+            width: Int,
+            height: Int
+        ) {
+            super.onSurfaceChanged(holder, format, width, height)
+            glSurfaceView?.surfaceChanged(holder, format, width, height)
+        }
+
+        override fun onSurfaceDestroyed(holder: SurfaceHolder) {
+            super.onSurfaceDestroyed(holder)
+            glSurfaceView?.surfaceDestroyed(holder)
         }
 
         override fun onVisibilityChanged(visible: Boolean) {
             super.onVisibilityChanged(visible)
-            if (!rendererSet) return
-
             if (visible) {
                 glSurfaceView?.onResume()
             } else {
@@ -72,24 +89,24 @@ class SolarSystemWallpaperService : WallpaperService() {
             event?.let { touchHandler?.onTouchEvent(it) }
         }
 
-        override fun onSurfaceDestroyed(holder: SurfaceHolder) {
-            super.onSurfaceDestroyed(holder)
-            if (rendererSet) {
-                glSurfaceView?.onPause()
-            }
-        }
-
         override fun onDestroy() {
             super.onDestroy()
-            if (rendererSet) {
-                glSurfaceView?.onPause()
-                glSurfaceView?.onWallpaperDestroy()
-                renderer?.release()
-            }
+            glSurfaceView?.onPause()
+            glSurfaceView?.onWallpaperDestroy()
+            renderer?.release()
             glSurfaceView = null
             renderer = null
             touchHandler = null
-            rendererSet = false
+        }
+
+        inner class WallpaperGLSurfaceView(context: Context) : GLSurfaceView(context) {
+            override fun getHolder(): SurfaceHolder {
+                return surfaceHolder
+            }
+
+            fun onWallpaperDestroy() {
+                super.onDetachedFromWindow()
+            }
         }
     }
 }

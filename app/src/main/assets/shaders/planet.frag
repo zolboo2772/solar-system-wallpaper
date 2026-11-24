@@ -1,11 +1,12 @@
 #version 320 es
-precision mediump float;
+precision highp float;
 
 in vec3 v_worldPosition;
 in vec3 v_normal;
 in vec2 v_texCoord;
 in vec3 v_viewDir;
-in mat3 v_tbn;
+in vec3 v_tangent;
+in vec3 v_bitangent;
 
 uniform sampler2D u_diffuseMap;
 uniform sampler2D u_normalMap;
@@ -60,7 +61,8 @@ void main() {
     vec3 N;
     if (u_hasNormalMap > 0.5) {
         vec3 normalSample = texture(u_normalMap, v_texCoord).rgb * 2.0 - 1.0;
-        N = normalize(v_tbn * normalSample);
+        mat3 tbn = mat3(normalize(v_tangent), normalize(v_bitangent), normalize(v_normal));
+        N = normalize(tbn * normalSample);
     } else {
         N = normalize(v_normal);
     }

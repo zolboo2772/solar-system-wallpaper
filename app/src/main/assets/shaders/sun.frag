@@ -1,5 +1,5 @@
 #version 320 es
-precision mediump float;
+precision highp float;
 
 in vec2 v_texCoord;
 in vec3 v_normal;
@@ -12,7 +12,9 @@ uniform vec3 u_cameraPosition;
 out vec4 fragColor;
 
 float hash(vec2 p) {
-    return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123);
+    p = fract(p * vec2(0.3183099, 0.3678794) + 0.1);
+    p *= 17.0;
+    return fract(p.x * p.y * (p.x + p.y));
 }
 
 float noise(vec2 p) {
@@ -26,35 +28,27 @@ float noise(vec2 p) {
     return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
 }
 
-float fbm(vec2 p) {
-    float value = 0.0;
-    float amplitude = 0.5;
-    for (int i = 0; i < 4; i++) {
-        value += amplitude * noise(p);
-        p *= 2.0;
-        amplitude *= 0.5;
-    }
-    return value;
-}
-
 void main() {
     vec3 baseColor = texture(u_diffuseMap, v_texCoord).rgb;
 
-    vec2 animUV = v_texCoord * 4.0 + vec2(u_time * 0.02, u_time * 0.01);
-    float turbulence = fbm(animUV) * 0.3;
+    // Moving solar convection granules
+    vec2 uv1 = v_texCoord * 6.0 + vec2(u_time * 0.03, u_time * 0.02);
+    vec2 uv2 = v_texCoord * 12.0 - vec2(u_time * 0.02, u_time * 0.03);
+    float n1 = noise(uv1);
+    float n2 = noise(uv2);
+    float turbulence = (n1 * 0.6 + n2 * 0.4) * 0.25;
 
-    vec3 hotColor = vec3(1.0, 0.95, 0.6);
-    vec3 coolColor = vec3(1.0, 0.4, 0.1);
-    vec3 sunColor = mix(coolColor, hotColor, baseColor.r + turbulence);
+    vec3 hotColor = vec3(1.0, 0.96, 0.7);
+    vec3 coolColor = vec3(1.0, 0.45, 0.1);
+    vec3 sunColor = mix(coolColor, hotColor, clamp(baseColor.r + turbulence, 0.0, 1.0));
 
-    sunColor *= 2.5;
-
+    // Corona rim glow
     vec3 viewDir = normalize(u_cameraPosition - v_worldPosition);
     float rim = 1.0 - max(dot(normalize(v_normal), viewDir), 0.0);
-    rim = pow(rim, 2.0);
-    vec3 coronaColor = vec3(1.0, 0.6, 0.2) * rim * 3.0;
-    sunColor += coronaColor;
+    rim = pow(rim, 2.5);
+    vec3 coronaColor = vec3(1.0, 0.65, 0.2) * rim * 2.0;
 
+    sunColor = sunColor * 1.8 + coronaColor;
     sunColor = sunColor / (sunColor + vec3(1.0));
     sunColor = pow(sunColor, vec3(1.0 / 2.2));
 

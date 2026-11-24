@@ -4,63 +4,60 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FF000010">
+    android:background="#FF000008">
 
-    <ImageView
-        android:id="@+id/backgroundImage"
+    <android.opengl.GLSurfaceView
+        android:id="@+id/glPreviewView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:scaleType="centerCrop"
-        android:alpha="0.3"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:layout_height="match_parent" />
+
+    <!-- Bottom gradient so buttons and text stand out clearly -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="220dp"
+        android:background="#AA000008"
+        app:layout_constraintBottom_toBottomOf="parent" />
 
     <LinearLayout
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:gravity="center"
-        android:padding="32dp"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        android:padding="24dp"
+        app:layout_constraintBottom_toBottomOf="parent">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="☀️ Solar System"
-            android:textSize="32sp"
+            android:text="☀️ Solar System 3D"
+            android:textSize="26sp"
             android:textColor="#FFFFFFFF"
             android:textStyle="bold"
-            android:layout_marginBottom="8dp" />
+            android:layout_marginBottom="4dp" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Interactive Live Wallpaper"
-            android:textSize="16sp"
+            android:textSize="14sp"
             android:textColor="#B3FFFFFF"
-            android:layout_marginBottom="48dp" />
+            android:layout_marginBottom="20dp" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnSetWallpaper"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="56dp"
             android:text="@string/set_wallpaper"
             android:textSize="16sp"
-            android:paddingStart="32dp"
-            android:paddingEnd="32dp"
             app:cornerRadius="28dp"
-            android:layout_marginBottom="16dp" />
+            android:layout_marginBottom="12dp" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnSettings"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="48dp"
             android:text="@string/open_settings"
             android:textSize="14sp"
-            android:paddingStart="24dp"
-            android:paddingEnd="24dp"
             style="@style/Widget.Material3.Button.OutlinedButton"
             app:cornerRadius="24dp"
             app:strokeColor="#80FFFFFF" />
