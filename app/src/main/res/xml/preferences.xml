@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <ListPreference
+        android:key="quality"
+        android:title="@string/pref_quality_title"
+        android:summary="@string/pref_quality_summary"
+        android:entries="@array/quality_entries"
+        android:entryValues="@array/quality_values"
+        android:defaultValue="high" />
+
+    <SeekBarPreference
+        android:key="orbit_speed"
+        android:title="@string/pref_orbit_speed_title"
+        android:summary="@string/pref_orbit_speed_summary"
+        android:defaultValue="50"
+        android:max="100"
+        app:min="1"
+        app:showSeekBarValue="true" />
+
+    <SwitchPreferenceCompat
+        android:key="auto_rotate"
+        android:title="@string/pref_auto_rotate_title"
+        android:summary="@string/pref_auto_rotate_summary"
+        android:defaultValue="true" />
+
+    <SwitchPreferenceCompat
+        android:key="planet_labels"
+        android:title="@string/pref_labels_title"
+        android:summary="@string/pref_labels_summary"
+        android:defaultValue="true" />
+
+    <SeekBarPreference
+        android:key="star_density"
+        android:title="@string/pref_star_density_title"
+        android:summary="@string/pref_star_density_summary"
+        android:defaultValue="70"
+        android:max="100"
+        app:min="10"
+        app:showSeekBarValue="true" />
+
+</PreferenceScreen>
