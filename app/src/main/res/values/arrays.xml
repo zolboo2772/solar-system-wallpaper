@@ -34,4 +34,12 @@
         <item>Uranus</item>
         <item>Neptune</item>
     </string-array>
+    <string-array name="lighting_entries">
+        <item>Vivid (Clear Night Side)</item>
+        <item>Cinematic (Deep Contrast)</item>
+    </string-array>
+    <string-array name="lighting_values">
+        <item>vivid</item>
+        <item>cinematic</item>
+    </string-array>
 </resources>

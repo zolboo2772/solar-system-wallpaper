@@ -47,6 +47,10 @@ class ShaderProgram(
         GLES32.glUniform3f(getUniformLocation(name), x, y, z)
     }
 
+    fun setUniform4f(name: String, x: Float, y: Float, z: Float, w: Float) {
+        GLES32.glUniform4f(getUniformLocation(name), x, y, z, w)
+    }
+
     fun setUniform1f(name: String, value: Float) {
         GLES32.glUniform1f(getUniformLocation(name), value)
     }

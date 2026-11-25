@@ -50,6 +50,24 @@ class CelestialBody(val config: PlanetConfig) {
         if (rotationAngle > 360f) rotationAngle -= 360f
     }
 
+    fun updateAround(parentPosition: Vector3, deltaTime: Float, speedMultiplier: Float, inclinationDeg: Float = 5.1f) {
+        orbitAngle += (deltaTime / config.orbitPeriod) * 360f * speedMultiplier
+        if (orbitAngle > 360f) orbitAngle -= 360f
+
+        val rad = Math.toRadians(orbitAngle.toDouble())
+        val incRad = Math.toRadians(inclinationDeg.toDouble())
+        val localX = (config.orbitRadius * cos(rad)).toFloat()
+        val localZ = (config.orbitRadius * sin(rad)).toFloat()
+        val localY = (localZ * sin(incRad)).toFloat()
+        worldPosition = Vector3(
+            parentPosition.x + localX,
+            parentPosition.y + localY,
+            parentPosition.z + (localZ * cos(incRad)).toFloat()
+        )
+
+        rotationAngle = -orbitAngle // Tidally locked to parent
+    }
+
     fun draw(
         shader: ShaderProgram,
         sphereMesh: Mesh,
@@ -58,7 +76,8 @@ class CelestialBody(val config: PlanetConfig) {
         projectionMatrix: FloatArray,
         cameraPosition: Vector3,
         lightDirection: FloatArray,
-        time: Float
+        time: Float,
+        ambientStrength: Float = 0.05f
     ) {
         shader.use()
 
@@ -79,7 +98,7 @@ class CelestialBody(val config: PlanetConfig) {
         shader.setUniform3f("u_lightColor", 1f, 0.98f, 0.92f)
         shader.setUniform1f("u_roughness", config.roughness)
         shader.setUniform1f("u_metallic", config.metallic)
-        shader.setUniform1f("u_ambientStrength", 0.04f)
+        shader.setUniform1f("u_ambientStrength", ambientStrength)
 
         textureManager.bind(config.diffuseTexture, 0)
         shader.setUniform1i("u_diffuseMap", 0)
@@ -143,6 +162,17 @@ class CelestialBody(val config: PlanetConfig) {
     }
 
     companion object {
+        fun createEarthMoon(): CelestialBody = CelestialBody(PlanetConfig(
+            name = "Moon",
+            radius = 0.042f,
+            orbitRadius = 0.34f,
+            orbitPeriod = 14f,
+            rotationPeriod = 14f,
+            axialTilt = 6.7f,
+            diffuseTexture = "moon_diffuse",
+            roughness = 0.96f
+        ))
+
         fun createAllPlanets(): List<CelestialBody> = listOf(
             CelestialBody(PlanetConfig(
                 name = "Mercury", radius = 0.08f, orbitRadius = 1.8f,

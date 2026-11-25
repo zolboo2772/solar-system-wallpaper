@@ -12,7 +12,9 @@ import com.cosmicwall.solarsystem.gl.ShaderManager
 import com.cosmicwall.solarsystem.gl.TextureManager
 import com.cosmicwall.solarsystem.interaction.CameraController
 import com.cosmicwall.solarsystem.interaction.RayCaster
+import com.cosmicwall.solarsystem.scene.AtmosphereHalo
 import com.cosmicwall.solarsystem.scene.CelestialBody
+import com.cosmicwall.solarsystem.scene.OrbitTracks
 import com.cosmicwall.solarsystem.scene.SaturnRings
 import com.cosmicwall.solarsystem.scene.Skybox
 import com.cosmicwall.solarsystem.scene.Sun
@@ -35,8 +37,11 @@ class SolarSystemRenderer(
 
     val sun = Sun()
     val planets = CelestialBody.createAllPlanets()
+    val moon = CelestialBody.createEarthMoon()
     private val saturnRings = SaturnRings()
     private val skybox = Skybox()
+    private val orbitTracks = OrbitTracks()
+    private val atmosphereHalo = AtmosphereHalo()
 
     private val frameRateController = FrameRateController()
     private var totalTime = 0f
@@ -84,10 +89,15 @@ class SolarSystemRenderer(
         )
 
         skybox.init()
+        orbitTracks.init()
 
         planets.forEachIndexed { index, planet ->
             planet.orbitAngle = (index * 45f) + (Math.random().toFloat() * 30f)
             planet.update(0f, 1f)
+        }
+        planets.find { it.config.name == "Earth" }?.let { earth ->
+            moon.orbitAngle = 210f
+            moon.updateAround(earth.worldPosition, 0f, 1f)
         }
 
         applySelectedPlanet(triggerZoom = prefs.unlockZoomEffect)
@@ -111,6 +121,9 @@ class SolarSystemRenderer(
         camera.isAutoRotating = prefs.autoRotate
         sun.update(dt)
         planets.forEach { it.update(dt, speedMult) }
+        planets.find { it.config.name == "Earth" }?.let { earth ->
+            moon.updateAround(earth.worldPosition, dt, speedMult)
+        }
 
         if (pendingPlanetUpdate || (::prefs.isInitialized && prefs.selectedPlanet != lastAppliedPlanet)) {
             pendingPlanetUpdate = false
@@ -148,9 +161,17 @@ class SolarSystemRenderer(
             skybox.draw(skyboxShader, viewMatrix, projMatrix, prefs.starDensity, totalTime)
         }
 
+        if (prefs.selectedPlanet.equals("all", ignoreCase = true) && prefs.showOrbits) {
+            shaderManager.get("orbit")?.let { orbitShader ->
+                orbitTracks.draw(orbitShader, planets, viewMatrix, projMatrix)
+            }
+        }
+
         shaderManager.get("sun")?.let { sunShader ->
             sun.draw(sunShader, sphereMesh, textureManager, viewMatrix, projMatrix, camPos, totalTime)
         }
+
+        val ambientStrength = if (prefs.lightingStyle == "vivid") 0.085f else 0.035f
 
         shaderManager.get("planet")?.let { planetShader ->
             for (planet in planets) {
@@ -161,7 +182,39 @@ class SolarSystemRenderer(
 
                 planet.draw(
                     planetShader, sphereMesh, textureManager,
-                    viewMatrix, projMatrix, camPos, lightDirection, totalTime
+                    viewMatrix, projMatrix, camPos, lightDirection, totalTime, ambientStrength
+                )
+            }
+
+            // Earth's Moon
+            val toSunMoon = (sun.position - moon.worldPosition).normalized()
+            lightDirection[0] = -toSunMoon.x
+            lightDirection[1] = -toSunMoon.y
+            lightDirection[2] = -toSunMoon.z
+            moon.draw(
+                planetShader, sphereMesh, textureManager,
+                viewMatrix, projMatrix, camPos, lightDirection, totalTime, ambientStrength
+            )
+        }
+
+        // Volumetric outer atmospheric shells + solar corona halo
+        shaderManager.get("atmosphere")?.let { atmoShader ->
+            atmosphereHalo.draw(
+                atmoShader, sphereMesh, sun.position, sun.radius * 1.38f,
+                floatArrayOf(1.0f, 0.56f, 0.16f), intensity = 0.72f, power = 3.6f, isSun = true,
+                viewMatrix, projMatrix, camPos, lightDirection
+            )
+            for (planet in planets) {
+                val atmoCol = planet.config.atmosphereColor ?: continue
+                if (planet.config.atmosphereIntensity <= 0f) continue
+                val toSun = (sun.position - planet.worldPosition).normalized()
+                lightDirection[0] = -toSun.x
+                lightDirection[1] = -toSun.y
+                lightDirection[2] = -toSun.z
+                atmosphereHalo.draw(
+                    atmoShader, sphereMesh, planet.worldPosition, planet.config.radius * 1.075f,
+                    atmoCol, intensity = (planet.config.atmosphereIntensity * 0.45f).coerceAtMost(0.75f),
+                    power = 4.2f, isSun = false, viewMatrix, projMatrix, camPos, lightDirection
                 )
             }
         }
@@ -220,7 +273,7 @@ class SolarSystemRenderer(
                     val sunAngleDeg = Math.toDegrees(
                         kotlin.math.atan2(target.worldPosition.x.toDouble(), target.worldPosition.z.toDouble())
                     ).toFloat()
-                    camera.setHeroMode(distance = heroDist, elevation = 14f, azimuthHint = sunAngleDeg + 115f)
+                    camera.setHeroMode(distance = heroDist, elevation = 14f, azimuthHint = sunAngleDeg + 125f)
                     camera.snapToTarget(target.worldPosition)
                 } else {
                     camera.setSystemMode()
@@ -244,6 +297,10 @@ class SolarSystemRenderer(
         val target = planets.find { it.config.name.equals(selected, ignoreCase = true) }
         if (target != null) {
             camera.trackTarget(target.worldPosition)
+            val sunAngleDeg = Math.toDegrees(
+                kotlin.math.atan2(target.worldPosition.x.toDouble(), target.worldPosition.z.toDouble())
+            ).toFloat()
+            camera.updateHeroSunAngle(sunAngleDeg + 125f)
         }
     }
 
@@ -260,6 +317,7 @@ class SolarSystemRenderer(
         if (::textureManager.isInitialized) textureManager.releaseAll()
         if (::sphereMesh.isInitialized) sphereMesh.release()
         if (::ringMesh.isInitialized) ringMesh.release()
+        orbitTracks.release()
         skybox.release()
     }
 

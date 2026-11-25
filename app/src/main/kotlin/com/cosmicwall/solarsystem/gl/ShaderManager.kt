@@ -25,6 +25,8 @@ class ShaderManager(private val context: Context) {
         loadShader("sun", "shaders/sun.vert", "shaders/sun.frag")
         loadShader("ring", "shaders/ring.vert", "shaders/ring.frag")
         loadShader("skybox", "shaders/skybox.vert", "shaders/skybox.frag")
+        loadShader("atmosphere", "shaders/atmosphere.vert", "shaders/atmosphere.frag")
+        loadShader("orbit", "shaders/orbit.vert", "shaders/orbit.frag")
         loadShader("label", "shaders/label.vert", "shaders/label.frag")
     }
 

@@ -17,6 +17,20 @@
         android:defaultValue="true" />
 
     <ListPreference
+        android:key="lighting_style"
+        android:title="@string/pref_lighting_title"
+        android:summary="@string/pref_lighting_summary"
+        android:entries="@array/lighting_entries"
+        android:entryValues="@array/lighting_values"
+        android:defaultValue="vivid" />
+
+    <SwitchPreferenceCompat
+        android:key="show_orbits"
+        android:title="@string/pref_orbits_title"
+        android:summary="@string/pref_orbits_summary"
+        android:defaultValue="true" />
+
+    <ListPreference
         android:key="quality"
         android:title="@string/pref_quality_title"
         android:summary="@string/pref_quality_summary"

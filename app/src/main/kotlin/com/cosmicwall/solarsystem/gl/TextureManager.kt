@@ -61,6 +61,7 @@ class TextureManager(private val context: Context) {
 
     fun loadAll() {
         loadTexture("sun_diffuse", "textures/sun.jpg")
+        loadTexture("moon_diffuse", "textures/moon.jpg")
         loadTexture("mercury_diffuse", "textures/mercury.jpg")
         loadTexture("venus_diffuse", "textures/venus_atmosphere.jpg")
         loadTexture("earth_diffuse", "textures/earth_daymap.jpg")

@@ -77,6 +77,7 @@ object ProceduralTextureGenerator {
 
         val pixels: CachedPixels = when {
             name.contains("sun") -> generateSun()
+            name.contains("moon") -> generateMoon()
             name.contains("mercury") -> generateMercury()
             name.contains("venus") -> generateVenus()
             name.contains("earth_diffuse") -> generateEarthDiffuse()
@@ -303,6 +304,56 @@ object ProceduralTextureGenerator {
                 val b = lerp(10f, 130f, heat.pow(2.0f))
                 pixels[idx] = rgb(r, g, b)
             }
+        }
+        return CachedPixels(pixels, WIDTH, HEIGHT)
+    }
+
+    private fun generateMoon(): CachedPixels {
+        val pixels = IntArray(WIDTH * HEIGHT)
+        val craterCount = 45
+        val cx = FloatArray(craterCount)
+        val cy = FloatArray(craterCount)
+        val cz = FloatArray(craterCount)
+        val cr = FloatArray(craterCount)
+        for (c in 0 until craterCount) {
+            val u = hash1(c * 19 + 5) * 2f - 1f
+            val phi = hash1(c * 31 + 11) * 2f * Math.PI.toFloat()
+            val s = sqrt(max(0f, 1f - u * u))
+            cx[c] = s * cos(phi)
+            cy[c] = u
+            cz[c] = s * sin(phi)
+            cr[c] = 0.04f + hash1(c * 47 + 9).pow(2f) * 0.20f
+        }
+
+        for (i in 0 until WIDTH * HEIGHT) {
+            val nx = sphereX[i]
+            val ny = sphereY[i]
+            val nz = sphereZ[i]
+
+            // Lunar maria (dark basalt basins) vs bright anorthosite highlands
+            val mare = fbm3(nx * 2.2f, ny * 2.2f, nz * 2.2f, 4, 1409)
+            var albedo = if (mare < -0.05f) 0.44f else 0.72f
+            albedo += fbm3(nx * 10f, ny * 10f, nz * 10f, 3, 1423) * 0.14f
+
+            for (c in 0 until craterCount) {
+                val dx = nx - cx[c]
+                val dy = ny - cy[c]
+                val dz = nz - cz[c]
+                val d2 = dx * dx + dy * dy + dz * dz
+                val rad = cr[c]
+                if (d2 < rad * rad * 1.4f) {
+                    val d = sqrt(d2) / rad
+                    if (d < 0.75f) {
+                        albedo -= 0.12f * (1f - d / 0.75f)
+                    } else if (d < 1.12f) {
+                        val rim = 1f - abs(d - 0.90f) / 0.22f
+                        albedo += 0.14f * max(0f, rim)
+                    }
+                }
+            }
+
+            val v = albedo.coerceIn(0.24f, 0.92f)
+            pixels[i] = rgb(v * 238f, v * 238f, v * 242f)
         }
         return CachedPixels(pixels, WIDTH, HEIGHT)
     }

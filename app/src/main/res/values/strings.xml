@@ -21,4 +21,8 @@
     <string name="pref_planet_summary">Choose which planet to showcase or view the full Solar System</string>
     <string name="pref_unlock_zoom_title">Unlock Fly-In Zoom</string>
     <string name="pref_unlock_zoom_summary">Smooth Super Wallpaper zoom-in transition when unlocking your phone</string>
+    <string name="pref_lighting_title">Lighting Contrast</string>
+    <string name="pref_lighting_summary">Balance dark-side detail vs deep space shadows</string>
+    <string name="pref_orbits_title">Show Orbit Tracks</string>
+    <string name="pref_orbits_summary">Render orbital paths when viewing All Solar System</string>
 </resources>

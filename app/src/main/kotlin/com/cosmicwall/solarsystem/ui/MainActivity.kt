@@ -38,6 +38,7 @@ class MainActivity : AppCompatActivity() {
         val id: String,
         val label: String,
         val subtitle: String,
+        val specs: String,
         val highlightColor: Int,
         val midColor: Int,
         val shadowColor: Int,
@@ -45,25 +46,25 @@ class MainActivity : AppCompatActivity() {
     )
 
     private val options = listOf(
-        PlanetOption("Earth", "Earth", "3rd Planet • 149.6M km • 24h Day",
+        PlanetOption("Earth", "Earth", "3rd Planet • 149.6M km • 24h Day", "Diameter 12,742 km  •  15 °C  •  1 Moon",
             Color.parseColor("#FF7CD4FF"), Color.parseColor("#FF1F6FEB"), Color.parseColor("#FF081D4D"), Color.parseColor("#FF58B8FF")),
-        PlanetOption("Saturn", "Saturn", "6th Planet • 1.43B km • Cassini Rings",
+        PlanetOption("Saturn", "Saturn", "6th Planet • 1.43B km • Cassini Rings", "Diameter 116,460 km  •  -140 °C  •  146 Moons",
             Color.parseColor("#FFFCE8B2"), Color.parseColor("#FFD2A860"), Color.parseColor("#FF5C421C"), Color.parseColor("#FFF0D290")),
-        PlanetOption("Mars", "Mars", "4th Planet • 227.9M km • Red Planet",
+        PlanetOption("Mars", "Mars", "4th Planet • 227.9M km • Red Planet", "Diameter 6,779 km  •  -65 °C  •  2 Moons",
             Color.parseColor("#FFFF9A6C"), Color.parseColor("#FFC74A24"), Color.parseColor("#FF4A1408"), Color.parseColor("#FFE87042")),
-        PlanetOption("Jupiter", "Jupiter", "5th Planet • 778.5M km • Gas Giant",
+        PlanetOption("Jupiter", "Jupiter", "5th Planet • 778.5M km • Gas Giant", "Diameter 139,820 km  •  -110 °C  •  95 Moons",
             Color.parseColor("#FFF5D3A8"), Color.parseColor("#FFC47A45"), Color.parseColor("#FF4D2712"), Color.parseColor("#FFE6A772")),
-        PlanetOption("all", "Solar System", "8 Planets • Heliocentric 3D Orbit",
+        PlanetOption("all", "Solar System", "8 Planets • Heliocentric 3D Orbit", "1 Star  •  8 Planets  •  Orbit Tracks",
             Color.parseColor("#FF9CB6FF"), Color.parseColor("#FF4562D9"), Color.parseColor("#FF101840"), Color.parseColor("#FF7A9AFF")),
-        PlanetOption("Sun", "Sun", "G-Type Star • 5,778 K Photosphere",
+        PlanetOption("Sun", "Sun", "G-Type Star • 5,778 K Photosphere", "Diameter 1.39M km  •  4.6B Years Old",
             Color.parseColor("#FFFFF3B0"), Color.parseColor("#FFFF8C1A"), Color.parseColor("#FF991B00"), Color.parseColor("#FFFFB830")),
-        PlanetOption("Venus", "Venus", "2nd Planet • 108.2M km • Cloud Deck",
+        PlanetOption("Venus", "Venus", "2nd Planet • 108.2M km • Cloud Deck", "Diameter 12,104 km  •  464 °C  •  0 Moons",
             Color.parseColor("#FFFFF0C8"), Color.parseColor("#FFD9AE6E"), Color.parseColor("#FF63471E"), Color.parseColor("#FFF2D08A")),
-        PlanetOption("Mercury", "Mercury", "1st Planet • 57.9M km • Cratered",
+        PlanetOption("Mercury", "Mercury", "1st Planet • 57.9M km • Cratered", "Diameter 4,879 km  •  167 °C  •  0 Moons",
             Color.parseColor("#FFE0DFDC"), Color.parseColor("#FF8F8D88"), Color.parseColor("#FF2E2D2B"), Color.parseColor("#FFB5B3AE")),
-        PlanetOption("Uranus", "Uranus", "7th Planet • 2.87B km • Ice Giant",
+        PlanetOption("Uranus", "Uranus", "7th Planet • 2.87B km • Ice Giant", "Diameter 50,724 km  •  -195 °C  •  28 Moons",
             Color.parseColor("#FFD8FAFF"), Color.parseColor("#FF6FC7D6"), Color.parseColor("#FF1A5260"), Color.parseColor("#FF9DE8F2")),
-        PlanetOption("Neptune", "Neptune", "8th Planet • 4.50B km • Deep Azure",
+        PlanetOption("Neptune", "Neptune", "8th Planet • 4.50B km • Deep Azure", "Diameter 49,244 km  •  -200 °C  •  16 Moons",
             Color.parseColor("#FF82ADFF"), Color.parseColor("#FF2D5CF2"), Color.parseColor("#FF0B1C63"), Color.parseColor("#FF5888FF"))
     )
 
@@ -150,8 +151,15 @@ class MainActivity : AppCompatActivity() {
         val meta = options.find { it.id.equals(selectedId, ignoreCase = true) }
         binding.tvPlanetTitle.text = meta?.label ?: selectedId
         binding.tvPlanetSubtitle.text = meta?.subtitle ?: "Interactive 3D Planet"
+        binding.tvPlanetSpecs.text = meta?.specs ?: "Orbital View"
 
         val density = resources.displayMetrics.density
+        binding.tvPlanetSpecs.background = GradientDrawable().apply {
+            shape = GradientDrawable.RECTANGLE
+            cornerRadius = density * 12f
+            setColor(Color.parseColor("#1FFFFFFF"))
+            setStroke((density * 1f).toInt().coerceAtLeast(1), Color.parseColor("#2EFFFFFF"))
+        }
         for ((id, card) in planetCardViews) {
             val isSelected = id.equals(selectedId, ignoreCase = true)
             val cardBg = GradientDrawable().apply {

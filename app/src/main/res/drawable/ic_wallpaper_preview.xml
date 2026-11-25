@@ -1,13 +1,63 @@
 <?xml version="1.0" encoding="utf-8"?>
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="48dp"
-    android:height="48dp"
-    android:viewportWidth="48"
-    android:viewportHeight="48">
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Deep cosmic background -->
     <path
-        android:fillColor="#FFD700"
-        android:pathData="M24,8 A16,16 0 1,0 24,40 A16,16 0 1,0 24,8Z" />
+        android:fillColor="#070B1A"
+        android:pathData="M0,0 L108,0 L108,108 L0,108 Z" />
+
+    <!-- Subtle cosmic nebula glow -->
     <path
-        android:fillColor="#4FC3F7"
-        android:pathData="M24,18 A6,6 0 1,0 24,30 A6,6 0 1,0 24,18Z" />
+        android:fillColor="#1A3B6CFF"
+        android:pathData="M54,14 A40,40 0 1,0 54,94 A40,40 0 1,0 54,14 Z" />
+
+    <!-- Back portion of tilted planetary ring -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#88E6C378"
+        android:strokeWidth="3.2"
+        android:pathData="M18,64 C16,52 38,38 62,36 C82,34 94,40 90,48" />
+
+    <!-- Planet base sphere (night side) -->
+    <path
+        android:fillColor="#0E1B3D"
+        android:pathData="M54,28 A26,26 0 1,0 54,80 A26,26 0 1,0 54,28 Z" />
+
+    <!-- Illuminated crescent hemisphere -->
+    <path
+        android:fillColor="#3A86FF"
+        android:pathData="M54,28 A26,26 0 0,0 54,80 A18,26 0 0,1 54,28 Z" />
+
+    <!-- Bright atmospheric highlight rim -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#CC80D8FF"
+        android:strokeWidth="2.2"
+        android:pathData="M54,28 A26,26 0 0,0 32,68" />
+
+    <!-- Front portion of tilted planetary ring -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#F4D799"
+        android:strokeWidth="3.5"
+        android:strokeLineCap="round"
+        android:pathData="M18,64 C22,74 44,72 68,62 C82,56 92,50 90,48" />
+
+    <!-- Crisp starlight sparkles -->
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M24,24 L25.5,27.5 L29,29 L25.5,30.5 L24,34 L22.5,30.5 L19,29 L22.5,27.5 Z" />
+    <path
+        android:fillColor="#B3FFFFFF"
+        android:pathData="M82,22 L83,24.5 L85.5,25.5 L83,26.5 L82,29 L81,26.5 L78.5,25.5 L81,24.5 Z" />
+    <path
+        android:fillColor="#9980D8FF"
+        android:pathData="M78,80 A1.8,1.8 0 1,0 78,83.6 A1.8,1.8 0 1,0 78,80 Z" />
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M28,78 A1.4,1.4 0 1,0 28,80.8 A1.4,1.4 0 1,0 28,78 Z" />
 </vector>

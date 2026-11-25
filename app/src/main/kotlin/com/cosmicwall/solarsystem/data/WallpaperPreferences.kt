@@ -14,6 +14,8 @@ class WallpaperPreferences(context: Context) {
         }
 
     val unlockZoomEffect: Boolean get() = prefs.getBoolean("unlock_zoom_effect", true)
+    val lightingStyle: String get() = prefs.getString("lighting_style", "vivid") ?: "vivid"
+    val showOrbits: Boolean get() = prefs.getBoolean("show_orbits", true)
     val quality: String get() = prefs.getString("quality", "high") ?: "high"
     val orbitSpeedMultiplier: Float get() = prefs.getInt("orbit_speed", 50) / 50f
     val autoRotate: Boolean get() = prefs.getBoolean("auto_rotate", true)

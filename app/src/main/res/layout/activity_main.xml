@@ -63,6 +63,20 @@
                 android:textColor="#99DCE4FF"
                 android:layout_marginTop="2dp" />
 
+            <TextView
+                android:id="@+id/tvPlanetSpecs"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Diameter 12,742 km  •  15 °C  •  1 Moon"
+                android:textSize="11sp"
+                android:textColor="#CCFFFFFF"
+                android:paddingStart="10dp"
+                android:paddingEnd="10dp"
+                android:paddingTop="4dp"
+                android:paddingBottom="4dp"
+                android:layout_marginTop="8dp"
+                android:background="#1FFFFFFF" />
+
         </LinearLayout>
 
         <LinearLayout
@@ -110,6 +124,15 @@
         android:paddingTop="12dp"
         android:paddingBottom="24dp"
         app:layout_constraintBottom_toBottomOf="parent">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:text="Drag to inspect  •  Pinch to zoom  •  Double-tap to reset"
+            android:textSize="11sp"
+            android:textColor="#66FFFFFF"
+            android:layout_marginBottom="10dp" />
 
         <HorizontalScrollView
             android:layout_width="match_parent"

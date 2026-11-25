@@ -5,6 +5,7 @@ import com.cosmicwall.solarsystem.util.Vector3
 import kotlin.math.cos
 import kotlin.math.sin
 import kotlin.math.min
+import kotlin.math.pow
 
 class CameraController {
     var azimuth = 45f
@@ -22,6 +23,10 @@ class CameraController {
     var isAutoRotating = true
     private var idleTime = 0f
     private val idleThreshold = 3f
+    private var elapsedTime = 0f
+
+    private var heroAnchorAzimuth = 45f
+    private var userAzimuthOffset = 0f
 
     private var azimuthVelocity = 0f
     private var elevationVelocity = 0f
@@ -46,7 +51,11 @@ class CameraController {
     fun onDrag(deltaX: Float, deltaY: Float) {
         azimuthVelocity = deltaX * 0.3f
         elevationVelocity = -deltaY * 0.3f
-        targetAzimuth += azimuthVelocity
+        if (isHeroMode) {
+            userAzimuthOffset += azimuthVelocity
+        } else {
+            targetAzimuth += azimuthVelocity
+        }
         targetElevation = (targetElevation + elevationVelocity).coerceIn(-65f, 85f)
         idleTime = 0f
     }
@@ -64,10 +73,17 @@ class CameraController {
         maxDistance = (distance * 4.5f).coerceAtLeast(18f)
         targetDistance = distance
         targetElevation = elevation
+        userAzimuthOffset = 0f
         if (azimuthHint != null) {
+            heroAnchorAzimuth = azimuthHint
             targetAzimuth = azimuthHint
         }
         idleTime = 0f
+    }
+
+    fun updateHeroSunAngle(azimuthHint: Float) {
+        if (!isHeroMode) return
+        heroAnchorAzimuth = azimuthHint
     }
 
     fun setSystemMode() {
@@ -76,6 +92,7 @@ class CameraController {
         heroElevation = 25f
         minDistance = 0.5f
         maxDistance = 35f
+        userAzimuthOffset = 0f
         lookAtTarget = Vector3.ZERO
         targetDistance = 18f
         targetElevation = 25f
@@ -109,9 +126,12 @@ class CameraController {
     }
 
     fun resetView() {
+        userAzimuthOffset = 0f
         if (!isHeroMode) {
             lookAtTarget = Vector3.ZERO
             targetAzimuth = 45f
+        } else {
+            targetAzimuth = heroAnchorAzimuth
         }
         targetElevation = heroElevation
         targetDistance = heroDistance
@@ -124,16 +144,23 @@ class CameraController {
     }
 
     fun update(deltaTime: Float) {
-        azimuthVelocity *= damping
-        elevationVelocity *= damping
+        elapsedTime += deltaTime
+        val dampFactor = damping.pow((deltaTime * 60f).coerceIn(0.1f, 3f))
+        azimuthVelocity *= dampFactor
+        elevationVelocity *= dampFactor
 
-        targetAzimuth += azimuthVelocity * deltaTime
-        targetElevation = (targetElevation + elevationVelocity * deltaTime).coerceIn(-65f, 85f)
-
-        idleTime += deltaTime
-        if (isAutoRotating && idleTime > idleThreshold) {
-            targetAzimuth += autoRotateSpeed * deltaTime
+        if (isHeroMode) {
+            userAzimuthOffset += azimuthVelocity * deltaTime * 2.5f
+            val breath = if (isAutoRotating) sin((elapsedTime * 0.22).toDouble()).toFloat() * 8f else 0f
+            targetAzimuth = heroAnchorAzimuth + userAzimuthOffset + breath
+        } else {
+            targetAzimuth += azimuthVelocity * deltaTime
+            idleTime += deltaTime
+            if (isAutoRotating && idleTime > idleThreshold) {
+                targetAzimuth += autoRotateSpeed * deltaTime
+            }
         }
+        targetElevation = (targetElevation + elevationVelocity * deltaTime).coerceIn(-65f, 85f)
 
         val t = min(1f, smoothSpeed * deltaTime)
         azimuth += (targetAzimuth - azimuth) * t
