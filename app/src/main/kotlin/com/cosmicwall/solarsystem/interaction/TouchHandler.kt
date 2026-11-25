@@ -15,6 +15,8 @@ class TouchHandler(
     var onPlanetTapped: ((CelestialBody) -> Unit)? = null
 
     private val gestureDetector = GestureDetector(context, object : GestureDetector.SimpleOnGestureListener() {
+        override fun onDown(e: MotionEvent): Boolean = true
+
         override fun onScroll(
             e1: MotionEvent?,
             e2: MotionEvent,

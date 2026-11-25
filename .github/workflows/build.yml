@@ -33,25 +33,27 @@ jobs:
 
     - name: Rename APK for Release
       run: |
-        cp app/build/outputs/apk/debug/app-debug.apk SolarSystemWallpaper-v1.0.4.apk
+        cp app/build/outputs/apk/debug/app-debug.apk SolarSystemWallpaper-v1.0.5.apk
 
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
       with:
-        name: SolarSystemWallpaper-v1.0.4-APK
-        path: SolarSystemWallpaper-v1.0.4.apk
+        name: SolarSystemWallpaper-v1.0.5-APK
+        path: SolarSystemWallpaper-v1.0.5.apk
         retention-days: 30
 
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v2
       if: github.ref == 'refs/heads/main'
       with:
-        tag_name: v1.0.4
-        name: Solar System Live Wallpaper v1.0.4
+        tag_name: v1.0.5
+        name: Solar System Live Wallpaper v1.0.5
         body: |
-          Solar System Live Wallpaper v1.0.4:
-          - Disabled touch interaction on the live wallpaper itself so home screen gestures and icons are never interrupted (only page-swipe parallax & unlock zoom remain active).
-          - Upgraded procedural textures to 1024x512 + GPU micro-detail, linear-space PBR lighting, ACES Filmic tone mapping, Earth ocean specular glint, and accurate Saturn ring shadows.
-          - Redesigned app UI with true edge-to-edge glassmorphic HUD, dynamic planet telemetry, and clean selector pills.
-        files: SolarSystemWallpaper-v1.0.4.apk
+          Solar System Live Wallpaper v1.0.5:
+          - Replaced GLSurfaceView wrapper inside WallpaperService with a native EGL14 render engine so planets reliably render on both Home Screen and Lock Screen.
+          - Fixed camera initial target snapping (planets are centered immediately on first frame and during unlock fly-in).
+          - Added adaptive portrait FOV so planets and Saturn's rings frame completely on tall displays (Galaxy S25 Ultra).
+          - Eliminated GLSL pow(0.0) NaN edge cases across shaders and cached procedural textures across engines.
+          - Redesigned Cosmos Studio UI with custom vector icons and 3D lit planet orb cards.
+        files: SolarSystemWallpaper-v1.0.5.apk
         token: ${{ secrets.GITHUB_TOKEN }}

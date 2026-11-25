@@ -3,4 +3,5 @@
     android:id="@+id/settings_container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FF000010" />
+    android:fitsSystemWindows="true"
+    android:background="#FF060914" />

@@ -52,6 +52,8 @@ class SolarSystemRenderer(
     @Volatile
     private var pendingUnlockZoom = false
 
+    private var lastAppliedPlanet: String? = null
+
     override fun onSurfaceCreated(gl: GL10?, config: EGLConfig?) {
         Log.d(TAG, "Surface created - initializing GL resources")
 
@@ -110,13 +112,13 @@ class SolarSystemRenderer(
         sun.update(dt)
         planets.forEach { it.update(dt, speedMult) }
 
-        if (pendingPlanetUpdate) {
+        if (pendingPlanetUpdate || (::prefs.isInitialized && prefs.selectedPlanet != lastAppliedPlanet)) {
             pendingPlanetUpdate = false
             applySelectedPlanet(triggerZoom = true)
         }
         if (pendingUnlockZoom) {
             pendingUnlockZoom = false
-            if (prefs.unlockZoomEffect) {
+            if (::prefs.isInitialized && prefs.unlockZoomEffect) {
                 camera.triggerXiaomiUnlockZoom()
             }
         }
@@ -196,30 +198,33 @@ class SolarSystemRenderer(
 
     private fun applySelectedPlanet(triggerZoom: Boolean) {
         val selected = if (::prefs.isInitialized) prefs.selectedPlanet else "Earth"
+        lastAppliedPlanet = selected
         when {
             selected.equals("all", ignoreCase = true) -> {
                 camera.setSystemMode()
+                camera.snapToTarget(sun.position)
             }
             selected.equals("Sun", ignoreCase = true) -> {
-                camera.setHeroMode(distance = 2.3f, elevation = 12f)
-                camera.trackTarget(sun.position)
+                camera.setHeroMode(distance = 2.5f, elevation = 12f)
+                camera.snapToTarget(sun.position)
             }
             else -> {
                 val target = planets.find { it.config.name.equals(selected, ignoreCase = true) }
                 if (target != null) {
                     val heroDist = if (target.config.name == "Saturn") {
-                        2.8f
+                        3.5f
                     } else {
-                        target.config.radius * 4.3f
+                        target.config.radius * 4.0f
                     }
                     // Position camera ~65 deg off the Sun-planet line for dramatic crescent terminator lighting
                     val sunAngleDeg = Math.toDegrees(
                         kotlin.math.atan2(target.worldPosition.x.toDouble(), target.worldPosition.z.toDouble())
                     ).toFloat()
                     camera.setHeroMode(distance = heroDist, elevation = 14f, azimuthHint = sunAngleDeg + 115f)
-                    camera.trackTarget(target.worldPosition)
+                    camera.snapToTarget(target.worldPosition)
                 } else {
                     camera.setSystemMode()
+                    camera.snapToTarget(sun.position)
                 }
             }
         }
@@ -250,9 +255,11 @@ class SolarSystemRenderer(
     }
 
     fun release() {
-        prefs.unregisterListener(this)
-        shaderManager.releaseAll()
-        textureManager.releaseAll()
+        if (::prefs.isInitialized) prefs.unregisterListener(this)
+        if (::shaderManager.isInitialized) shaderManager.releaseAll()
+        if (::textureManager.isInitialized) textureManager.releaseAll()
+        if (::sphereMesh.isInitialized) sphereMesh.release()
+        if (::ringMesh.isInitialized) ringMesh.release()
         skybox.release()
     }
 

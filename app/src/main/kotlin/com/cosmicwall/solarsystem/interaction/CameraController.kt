@@ -83,15 +83,23 @@ class CameraController {
     }
 
     fun triggerXiaomiUnlockZoom() {
-        val zoomMult = if (isHeroMode) 2.7f else 1.6f
+        val zoomMult = if (isHeroMode) 1.95f else 1.45f
         distance = (targetDistance * zoomMult).coerceAtMost(maxDistance)
-        elevation = (targetElevation + 18f).coerceIn(-65f, 85f)
-        azimuth = targetAzimuth - 32f
+        elevation = (targetElevation + 12f).coerceIn(-65f, 85f)
+        azimuth = targetAzimuth - 16f
         idleTime = 0f
+    }
+
+    fun snapToTarget(target: Vector3) {
+        lookAtTarget = target
+        currentLookAt = target
     }
 
     fun trackTarget(target: Vector3) {
         lookAtTarget = target
+        if (isHeroMode) {
+            currentLookAt = target
+        }
     }
 
     fun focusOnTarget(target: Vector3, focusDistance: Float = 1.2f) {
@@ -111,7 +119,7 @@ class CameraController {
     }
 
     fun onOffsetChanged(xOffset: Float) {
-        val sweep = if (isHeroMode) 50f else 20f
+        val sweep = if (isHeroMode) 45f else 20f
         parallaxOffset = (xOffset - 0.5f) * sweep
     }
 
@@ -128,11 +136,10 @@ class CameraController {
         }
 
         val t = min(1f, smoothSpeed * deltaTime)
-        val lookAtT = if (isHeroMode) min(1f, 14f * deltaTime) else t
         azimuth += (targetAzimuth - azimuth) * t
         elevation += (targetElevation - elevation) * t
         distance += (targetDistance - distance) * t
-        currentLookAt = currentLookAt.lerp(lookAtTarget, lookAtT)
+        currentLookAt = if (isHeroMode) lookAtTarget else currentLookAt.lerp(lookAtTarget, t)
 
         val azRad = Math.toRadians((azimuth + parallaxOffset).toDouble())
         val elRad = Math.toRadians(elevation.toDouble())
@@ -155,6 +162,12 @@ class CameraController {
         val w = if (width <= 0) 1 else width
         val h = if (height <= 0) 1 else height
         val aspect = w.toFloat() / h.toFloat()
-        Matrix.perspectiveM(projectionMatrix, 0, 45f, aspect, 0.03f, 150f)
+        // Expand vertical FOV automatically in portrait so planets and Saturn's rings frame completely
+        val fovY = if (aspect < 1f) {
+            (45f / kotlin.math.sqrt(aspect)).coerceIn(45f, 66f)
+        } else {
+            45f
+        }
+        Matrix.perspectiveM(projectionMatrix, 0, fovY, aspect, 0.03f, 150f)
     }
 }

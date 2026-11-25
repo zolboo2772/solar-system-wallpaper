@@ -3,42 +3,68 @@ package com.cosmicwall.solarsystem.ui
 import android.app.WallpaperManager
 import android.content.ComponentName
 import android.content.Intent
-import android.content.res.ColorStateList
 import android.graphics.Color
+import android.graphics.drawable.GradientDrawable
 import android.opengl.GLSurfaceView
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.MotionEvent
+import android.view.View
+import android.widget.LinearLayout
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
+import com.cosmicwall.solarsystem.R
 import com.cosmicwall.solarsystem.data.WallpaperPreferences
 import com.cosmicwall.solarsystem.databinding.ActivityMainBinding
+import com.cosmicwall.solarsystem.gl.CosmicEGLConfigChooser
 import com.cosmicwall.solarsystem.interaction.CameraController
 import com.cosmicwall.solarsystem.interaction.RayCaster
 import com.cosmicwall.solarsystem.interaction.TouchHandler
 import com.cosmicwall.solarsystem.renderer.SolarSystemRenderer
 import com.cosmicwall.solarsystem.wallpaper.SolarSystemWallpaperService
-import com.google.android.material.chip.Chip
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private var renderer: SolarSystemRenderer? = null
     private var touchHandler: TouchHandler? = null
+    private val planetCardViews = mutableMapOf<String, LinearLayout>()
 
-    private val planetMetadata = mapOf(
-        "all" to ("Solar System" to "8 Planets • Heliocentric 3D Orbit"),
-        "Earth" to ("Earth" to "3rd Planet • 149.6M km • 24h Day"),
-        "Saturn" to ("Saturn" to "6th Planet • 1.43B km • Cassini Rings"),
-        "Mars" to ("Mars" to "4th Planet • 227.9M km • Red Planet"),
-        "Jupiter" to ("Jupiter" to "5th Planet • 778.5M km • Gas Giant"),
-        "Sun" to ("The Sun" to "G-Type Star • 5,778 K Photosphere"),
-        "Venus" to ("Venus" to "2nd Planet • 108.2M km • Dense Cloud"),
-        "Mercury" to ("Mercury" to "1st Planet • 57.9M km • Cratered World"),
-        "Uranus" to ("Uranus" to "7th Planet • 2.87B km • Ice Giant"),
-        "Neptune" to ("Neptune" to "8th Planet • 4.50B km • Supersonic Winds")
+    private data class PlanetOption(
+        val id: String,
+        val label: String,
+        val subtitle: String,
+        val highlightColor: Int,
+        val midColor: Int,
+        val shadowColor: Int,
+        val rimColor: Int
+    )
+
+    private val options = listOf(
+        PlanetOption("Earth", "Earth", "3rd Planet • 149.6M km • 24h Day",
+            Color.parseColor("#FF7CD4FF"), Color.parseColor("#FF1F6FEB"), Color.parseColor("#FF081D4D"), Color.parseColor("#FF58B8FF")),
+        PlanetOption("Saturn", "Saturn", "6th Planet • 1.43B km • Cassini Rings",
+            Color.parseColor("#FFFCE8B2"), Color.parseColor("#FFD2A860"), Color.parseColor("#FF5C421C"), Color.parseColor("#FFF0D290")),
+        PlanetOption("Mars", "Mars", "4th Planet • 227.9M km • Red Planet",
+            Color.parseColor("#FFFF9A6C"), Color.parseColor("#FFC74A24"), Color.parseColor("#FF4A1408"), Color.parseColor("#FFE87042")),
+        PlanetOption("Jupiter", "Jupiter", "5th Planet • 778.5M km • Gas Giant",
+            Color.parseColor("#FFF5D3A8"), Color.parseColor("#FFC47A45"), Color.parseColor("#FF4D2712"), Color.parseColor("#FFE6A772")),
+        PlanetOption("all", "Solar System", "8 Planets • Heliocentric 3D Orbit",
+            Color.parseColor("#FF9CB6FF"), Color.parseColor("#FF4562D9"), Color.parseColor("#FF101840"), Color.parseColor("#FF7A9AFF")),
+        PlanetOption("Sun", "Sun", "G-Type Star • 5,778 K Photosphere",
+            Color.parseColor("#FFFFF3B0"), Color.parseColor("#FFFF8C1A"), Color.parseColor("#FF991B00"), Color.parseColor("#FFFFB830")),
+        PlanetOption("Venus", "Venus", "2nd Planet • 108.2M km • Cloud Deck",
+            Color.parseColor("#FFFFF0C8"), Color.parseColor("#FFD9AE6E"), Color.parseColor("#FF63471E"), Color.parseColor("#FFF2D08A")),
+        PlanetOption("Mercury", "Mercury", "1st Planet • 57.9M km • Cratered",
+            Color.parseColor("#FFE0DFDC"), Color.parseColor("#FF8F8D88"), Color.parseColor("#FF2E2D2B"), Color.parseColor("#FFB5B3AE")),
+        PlanetOption("Uranus", "Uranus", "7th Planet • 2.87B km • Ice Giant",
+            Color.parseColor("#FFD8FAFF"), Color.parseColor("#FF6FC7D6"), Color.parseColor("#FF1A5260"), Color.parseColor("#FF9DE8F2")),
+        PlanetOption("Neptune", "Neptune", "8th Planet • 4.50B km • Deep Azure",
+            Color.parseColor("#FF82ADFF"), Color.parseColor("#FF2D5CF2"), Color.parseColor("#FF0B1C63"), Color.parseColor("#FF5888FF"))
     )
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -58,13 +84,13 @@ class MainActivity : AppCompatActivity() {
             planets = ren.planets
             onPlanetTapped = { planet ->
                 renderer?.showPlanetLabel(planet)
-                updateHeader(planet.config.name)
+                updateSelectionUI(planet.config.name)
             }
         }
 
         binding.glPreviewView.apply {
             setEGLContextClientVersion(3)
-            setEGLConfigChooser(8, 8, 8, 8, 24, 0)
+            setEGLConfigChooser(CosmicEGLConfigChooser())
             setPreserveEGLContextOnPause(true)
             setRenderer(ren)
             renderMode = GLSurfaceView.RENDERMODE_CONTINUOUSLY
@@ -104,80 +130,82 @@ class MainActivity : AppCompatActivity() {
             ren.onWallpaperUnlocked()
         }
 
-        setupPlanetSelector(ren)
+        setupPlanetCards(ren)
     }
 
     private fun applyEdgeToEdgeInsets() {
-        val topBase = resources.displayMetrics.density * 16
-        val bottomBase = resources.displayMetrics.density * 24
+        val density = resources.displayMetrics.density
+        val topBase = (density * 16).toInt()
+        val bottomBase = (density * 24).toInt()
 
         ViewCompat.setOnApplyWindowInsetsListener(binding.root) { _, insets ->
             val sysBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            binding.topBar.updatePadding(top = sysBars.top + topBase.toInt())
-            binding.bottomBar.updatePadding(bottom = sysBars.bottom + bottomBase.toInt())
+            binding.topBar.updatePadding(top = sysBars.top + topBase)
+            binding.bottomBar.updatePadding(bottom = sysBars.bottom + bottomBase)
             insets
         }
     }
 
-    private fun updateHeader(planetId: String) {
-        val (title, subtitle) = planetMetadata[planetId] ?: (planetId to "Interactive 3D Planet")
-        binding.tvPlanetTitle.text = title
-        binding.tvPlanetSubtitle.text = subtitle
-    }
-
-    private fun setupPlanetSelector(ren: SolarSystemRenderer) {
-        val currentSelection = WallpaperPreferences(this).selectedPlanet
-        updateHeader(currentSelection)
-
-        val options = listOf(
-            "all" to "Solar System",
-            "Earth" to "Earth",
-            "Saturn" to "Saturn",
-            "Mars" to "Mars",
-            "Jupiter" to "Jupiter",
-            "Sun" to "Sun",
-            "Venus" to "Venus",
-            "Mercury" to "Mercury",
-            "Uranus" to "Uranus",
-            "Neptune" to "Neptune"
-        )
-
-        val chipBgStates = ColorStateList(
-            arrayOf(intArrayOf(android.R.attr.state_checked), intArrayOf()),
-            intArrayOf(Color.parseColor("#FF4A66F5"), Color.parseColor("#1FFFFFFF"))
-        )
-        val chipStrokeStates = ColorStateList(
-            arrayOf(intArrayOf(android.R.attr.state_checked), intArrayOf()),
-            intArrayOf(Color.parseColor("#FF8FA8FF"), Color.parseColor("#33FFFFFF"))
-        )
-        val chipTextStates = ColorStateList(
-            arrayOf(intArrayOf(android.R.attr.state_checked), intArrayOf()),
-            intArrayOf(Color.WHITE, Color.parseColor("#CCFFFFFF"))
-        )
+    private fun updateSelectionUI(selectedId: String) {
+        val meta = options.find { it.id.equals(selectedId, ignoreCase = true) }
+        binding.tvPlanetTitle.text = meta?.label ?: selectedId
+        binding.tvPlanetSubtitle.text = meta?.subtitle ?: "Interactive 3D Planet"
 
         val density = resources.displayMetrics.density
-        binding.chipGroupPlanets.removeAllViews()
-        for ((id, label) in options) {
-            val chip = Chip(this).apply {
-                tag = id
-                text = label
-                isCheckable = true
-                isCheckedIconVisible = false
-                isChecked = id.equals(currentSelection, ignoreCase = true)
-                chipBackgroundColor = chipBgStates
-                chipStrokeColor = chipStrokeStates
-                chipStrokeWidth = density * 1f
-                chipCornerRadius = density * 20f
-                setTextColor(chipTextStates)
-                textSize = 13f
-                setOnClickListener {
-                    updateHeader(id)
-                    ren.selectPlanet(id)
-                    ren.onWallpaperUnlocked()
+        for ((id, card) in planetCardViews) {
+            val isSelected = id.equals(selectedId, ignoreCase = true)
+            val cardBg = GradientDrawable().apply {
+                shape = GradientDrawable.RECTANGLE
+                cornerRadius = density * 16f
+                if (isSelected) {
+                    setColor(Color.parseColor("#335C7CFA"))
+                    setStroke((density * 1.5f).toInt().coerceAtLeast(1), Color.parseColor("#CCF0F4FF"))
+                } else {
+                    setColor(Color.parseColor("#14FFFFFF"))
+                    setStroke((density * 1f).toInt().coerceAtLeast(1), Color.parseColor("#1FFFFFFF"))
                 }
             }
-            binding.chipGroupPlanets.addView(chip)
+            card.background = cardBg
+            card.findViewById<TextView>(R.id.tvPlanetName)?.setTextColor(
+                if (isSelected) Color.WHITE else Color.parseColor("#AAFFFFFF")
+            )
         }
+    }
+
+    private fun setupPlanetCards(ren: SolarSystemRenderer) {
+        val density = resources.displayMetrics.density
+        val inflater = LayoutInflater.from(this)
+        binding.planetCardContainer.removeAllViews()
+        planetCardViews.clear()
+
+        for (opt in options) {
+            val card = inflater.inflate(R.layout.item_planet_option, binding.planetCardContainer, false) as LinearLayout
+            val orbView = card.findViewById<View>(R.id.viewPlanetOrb)
+            val nameView = card.findViewById<TextView>(R.id.tvPlanetName)
+
+            nameView.text = opt.label
+
+            // Crisp 3D lit orb preview badge
+            val orbDrawable = GradientDrawable(
+                GradientDrawable.Orientation.TL_BR,
+                intArrayOf(opt.highlightColor, opt.midColor, opt.shadowColor)
+            ).apply {
+                shape = GradientDrawable.OVAL
+                setStroke((density * 1.5f).toInt().coerceAtLeast(1), opt.rimColor)
+            }
+            orbView.background = orbDrawable
+
+            card.setOnClickListener {
+                updateSelectionUI(opt.id)
+                ren.selectPlanet(opt.id)
+            }
+
+            planetCardViews[opt.id] = card
+            binding.planetCardContainer.addView(card)
+        }
+
+        val currentSelection = WallpaperPreferences(this).selectedPlanet
+        updateSelectionUI(currentSelection)
     }
 
     override fun onTouchEvent(event: MotionEvent?): Boolean {
@@ -188,13 +216,7 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         val current = WallpaperPreferences(this).selectedPlanet
-        updateHeader(current)
-        for (i in 0 until binding.chipGroupPlanets.childCount) {
-            val chip = binding.chipGroupPlanets.getChildAt(i) as? Chip ?: continue
-            if ((chip.tag as? String).equals(current, ignoreCase = true) && !chip.isChecked) {
-                chip.isChecked = true
-            }
-        }
+        updateSelectionUI(current)
         binding.glPreviewView.onResume()
     }
 

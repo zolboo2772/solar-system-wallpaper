@@ -11,20 +11,18 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-    <!-- Smooth top gradient scrim -->
     <View
         android:layout_width="match_parent"
-        android:layout_height="180dp"
+        android:layout_height="200dp"
         android:background="@drawable/bg_top_scrim"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <!-- Top floating HUD -->
     <LinearLayout
         android:id="@+id/topBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:gravity="center_vertical"
+        android:gravity="top"
         android:paddingStart="24dp"
         android:paddingEnd="20dp"
         android:paddingTop="16dp"
@@ -40,19 +38,19 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="COSMOS • SUPER WALLPAPER"
-                android:textSize="11sp"
-                android:letterSpacing="0.16"
-                android:textColor="#99B4C6FF"
-                android:textStyle="bold" />
+                android:text="COSMOS STUDIO"
+                android:textSize="10.5sp"
+                android:letterSpacing="0.22"
+                android:textColor="#99A8C0FF"
+                android:fontFamily="sans-serif-medium" />
 
             <TextView
                 android:id="@+id/tvPlanetTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Earth"
-                android:textSize="32sp"
-                android:fontFamily="sans-serif-light"
+                android:textSize="36sp"
+                android:fontFamily="sans-serif-thin"
                 android:textColor="#FFFFFFFF"
                 android:layout_marginTop="2dp" />
 
@@ -61,43 +59,47 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="3rd Planet • 149.6M km • 24h Day"
-                android:textSize="13sp"
-                android:textColor="#B3DCE4FF"
+                android:textSize="12.5sp"
+                android:textColor="#99DCE4FF"
                 android:layout_marginTop="2dp" />
 
         </LinearLayout>
 
-        <ImageButton
-            android:id="@+id/btnReplayZoom"
-            android:layout_width="42dp"
-            android:layout_height="42dp"
-            android:background="@drawable/bg_glass_circle"
-            android:src="@android:drawable/ic_menu_rotate"
-            android:contentDescription="Replay Zoom"
-            app:tint="#FFFFFFFF"
-            android:padding="10dp"
-            android:layout_marginEnd="10dp" />
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="6dp">
 
-        <ImageButton
-            android:id="@+id/btnSettings"
-            android:layout_width="42dp"
-            android:layout_height="42dp"
-            android:background="@drawable/bg_glass_circle"
-            android:src="@android:drawable/ic_menu_preferences"
-            android:contentDescription="@string/open_settings"
-            app:tint="#FFFFFFFF"
-            android:padding="10dp" />
+            <ImageButton
+                android:id="@+id/btnReplayZoom"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="@drawable/bg_glass_circle"
+                android:src="@drawable/ic_zoom_sparkle"
+                android:contentDescription="Replay Unlock Zoom"
+                android:padding="10dp"
+                android:layout_marginEnd="10dp" />
+
+            <ImageButton
+                android:id="@+id/btnSettings"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="@drawable/bg_glass_circle"
+                android:src="@drawable/ic_settings_gear"
+                android:contentDescription="@string/open_settings"
+                android:padding="10dp" />
+
+        </LinearLayout>
 
     </LinearLayout>
 
-    <!-- Smooth bottom gradient scrim -->
     <View
         android:layout_width="match_parent"
-        android:layout_height="230dp"
+        android:layout_height="250dp"
         android:background="@drawable/bg_bottom_scrim"
         app:layout_constraintBottom_toBottomOf="parent" />
 
-    <!-- Bottom floating control dock -->
     <LinearLayout
         android:id="@+id/bottomBar"
         android:layout_width="match_parent"
@@ -114,16 +116,13 @@
             android:layout_height="wrap_content"
             android:scrollbars="none"
             android:clipToPadding="false"
-            android:layout_marginBottom="16dp">
+            android:layout_marginBottom="18dp">
 
-            <com.google.android.material.chip.ChipGroup
-                android:id="@+id/chipGroupPlanets"
+            <LinearLayout
+                android:id="@+id/planetCardContainer"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                app:singleSelection="true"
-                app:selectionRequired="true"
-                app:singleLine="true"
-                app:chipSpacingHorizontal="8dp" />
+                android:orientation="horizontal" />
 
         </HorizontalScrollView>
 
@@ -133,12 +132,12 @@
             android:layout_height="54dp"
             android:text="@string/set_wallpaper"
             android:textSize="15sp"
-            android:textStyle="bold"
-            android:letterSpacing="0.04"
-            android:textColor="#FFFFFFFF"
-            app:backgroundTint="#FF4A66F5"
+            android:fontFamily="sans-serif-medium"
+            android:letterSpacing="0.03"
+            android:textColor="#FF070A16"
+            app:backgroundTint="#FFF4F7FF"
             app:cornerRadius="27dp"
-            app:elevation="6dp" />
+            app:elevation="8dp" />
 
     </LinearLayout>
 

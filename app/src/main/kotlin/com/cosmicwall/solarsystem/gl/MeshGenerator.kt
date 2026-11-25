@@ -14,7 +14,12 @@ class Mesh(
     val iboId: Int,
     val indexCount: Int,
     val stride: Int
-)
+) {
+    fun release() {
+        if (vboId != 0) GLES32.glDeleteBuffers(1, intArrayOf(vboId), 0)
+        if (iboId != 0) GLES32.glDeleteBuffers(1, intArrayOf(iboId), 0)
+    }
+}
 
 object MeshGenerator {
 

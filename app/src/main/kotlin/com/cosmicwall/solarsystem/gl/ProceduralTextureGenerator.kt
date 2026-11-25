@@ -2,6 +2,7 @@ package com.cosmicwall.solarsystem.gl
 
 import android.graphics.Bitmap
 import android.graphics.Color
+import java.util.concurrent.ConcurrentHashMap
 import kotlin.math.abs
 import kotlin.math.cos
 import kotlin.math.floor
@@ -14,11 +15,16 @@ import kotlin.math.sqrt
 /**
  * Generates seamless 3D-mapped procedural planetary textures using fractional Brownian motion (fBm)
  * evaluated on the unit sphere to eliminate UV seam and polar-pinching artifacts.
+ * Results are cached in memory so multiple wallpaper engines (Preview, Home, Lock) initialize instantaneously.
  */
 object ProceduralTextureGenerator {
 
-    private const val WIDTH = 1024
-    private const val HEIGHT = 512
+    private const val WIDTH = 512
+    private const val HEIGHT = 256
+
+    private class CachedPixels(val pixels: IntArray, val width: Int, val height: Int)
+
+    private val textureCache = ConcurrentHashMap<String, CachedPixels>()
 
     // Precomputed unit-sphere coordinates for the 512x256 equirectangular grid
     private val sphereX: FloatArray
@@ -64,7 +70,12 @@ object ProceduralTextureGenerator {
     }
 
     fun generate(name: String): Bitmap {
-        return when {
+        val cached = textureCache[name]
+        if (cached != null) {
+            return bitmapFromPixels(cached.pixels, cached.width, cached.height)
+        }
+
+        val pixels: CachedPixels = when {
             name.contains("sun") -> generateSun()
             name.contains("mercury") -> generateMercury()
             name.contains("venus") -> generateVenus()
@@ -78,10 +89,10 @@ object ProceduralTextureGenerator {
             name.contains("saturn") -> generateSaturn()
             name.contains("uranus") -> generateUranus()
             name.contains("neptune") -> generateNeptune()
-            else -> Bitmap.createBitmap(64, 64, Bitmap.Config.ARGB_8888).apply {
-                eraseColor(Color.GRAY)
-            }
+            else -> CachedPixels(IntArray(64 * 64) { Color.GRAY }, 64, 64)
         }
+        textureCache[name] = pixels
+        return bitmapFromPixels(pixels.pixels, pixels.width, pixels.height)
     }
 
     private fun getEarthHeightMap(): FloatArray {
@@ -106,7 +117,7 @@ object ProceduralTextureGenerator {
         return heightMap
     }
 
-    private fun generateEarthDiffuse(): Bitmap {
+    private fun generateEarthDiffuse(): CachedPixels {
         val hMap = getEarthHeightMap()
         val pixels = IntArray(WIDTH * HEIGHT)
 
@@ -163,10 +174,10 @@ object ProceduralTextureGenerator {
                 }
             }
         }
-        return bitmapFromPixels(pixels, WIDTH, HEIGHT)
+        return CachedPixels(pixels, WIDTH, HEIGHT)
     }
 
-    private fun generateEarthNormal(): Bitmap {
+    private fun generateEarthNormal(): CachedPixels {
         val hMap = getEarthHeightMap()
         val pixels = IntArray(WIDTH * HEIGHT)
         val strength = 14f
@@ -201,10 +212,10 @@ object ProceduralTextureGenerator {
                 pixels[idx] = rgb(nr, ng, nb)
             }
         }
-        return bitmapFromPixels(pixels, WIDTH, HEIGHT)
+        return CachedPixels(pixels, WIDTH, HEIGHT)
     }
 
-    private fun generateEarthNight(): Bitmap {
+    private fun generateEarthNight(): CachedPixels {
         val hMap = getEarthHeightMap()
         val pixels = IntArray(WIDTH * HEIGHT)
 
@@ -235,10 +246,10 @@ object ProceduralTextureGenerator {
                 }
             }
         }
-        return bitmapFromPixels(pixels, WIDTH, HEIGHT)
+        return CachedPixels(pixels, WIDTH, HEIGHT)
     }
 
-    private fun generateEarthClouds(): Bitmap {
+    private fun generateEarthClouds(): CachedPixels {
         val pixels = IntArray(WIDTH * HEIGHT)
         for (i in 0 until WIDTH * HEIGHT) {
             val nx = sphereX[i]
@@ -260,10 +271,10 @@ object ProceduralTextureGenerator {
             // Planet shader reads .r from cloudMap
             pixels[i] = Color.argb(255, v, v, v)
         }
-        return bitmapFromPixels(pixels, WIDTH, HEIGHT)
+        return CachedPixels(pixels, WIDTH, HEIGHT)
     }
 
-    private fun generateSun(): Bitmap {
+    private fun generateSun(): CachedPixels {
         val pixels = IntArray(WIDTH * HEIGHT)
         for (y in 0 until HEIGHT) {
             val absLat = abs(latGrid[y]) / (Math.PI.toFloat() * 0.5f)
@@ -293,10 +304,10 @@ object ProceduralTextureGenerator {
                 pixels[idx] = rgb(r, g, b)
             }
         }
-        return bitmapFromPixels(pixels, WIDTH, HEIGHT)
+        return CachedPixels(pixels, WIDTH, HEIGHT)
     }
 
-    private fun generateMercury(): Bitmap {
+    private fun generateMercury(): CachedPixels {
         val pixels = IntArray(WIDTH * HEIGHT)
         // Generate deterministic crater centers on unit sphere
         val craterCount = 55
@@ -342,10 +353,10 @@ object ProceduralTextureGenerator {
             val v = albedo.coerceIn(0.18f, 0.88f)
             pixels[i] = rgb(v * 235f, v * 228f, v * 220f)
         }
-        return bitmapFromPixels(pixels, WIDTH, HEIGHT)
+        return CachedPixels(pixels, WIDTH, HEIGHT)
     }
 
-    private fun generateVenus(): Bitmap {
+    private fun generateVenus(): CachedPixels {
         val pixels = IntArray(WIDTH * HEIGHT)
         for (y in 0 until HEIGHT) {
             val lat = latGrid[y] // -PI/2..PI/2
@@ -368,10 +379,10 @@ object ProceduralTextureGenerator {
                 pixels[idx] = rgb(r, g, b)
             }
         }
-        return bitmapFromPixels(pixels, WIDTH, HEIGHT)
+        return CachedPixels(pixels, WIDTH, HEIGHT)
     }
 
-    private fun generateMars(): Bitmap {
+    private fun generateMars(): CachedPixels {
         val pixels = IntArray(WIDTH * HEIGHT)
         for (y in 0 until HEIGHT) {
             val lat = latGrid[y]
@@ -406,10 +417,10 @@ object ProceduralTextureGenerator {
                 pixels[idx] = rgb(r, g, b)
             }
         }
-        return bitmapFromPixels(pixels, WIDTH, HEIGHT)
+        return CachedPixels(pixels, WIDTH, HEIGHT)
     }
 
-    private fun generateJupiter(): Bitmap {
+    private fun generateJupiter(): CachedPixels {
         val pixels = IntArray(WIDTH * HEIGHT)
         // Great Red Spot center around lat -22 deg (-0.38 rad), lon 120 deg (2.1 rad)
         val grsLat = -0.38f
@@ -457,10 +468,10 @@ object ProceduralTextureGenerator {
                 pixels[idx] = rgb(r, g, b)
             }
         }
-        return bitmapFromPixels(pixels, WIDTH, HEIGHT)
+        return CachedPixels(pixels, WIDTH, HEIGHT)
     }
 
-    private fun generateSaturn(): Bitmap {
+    private fun generateSaturn(): CachedPixels {
         val pixels = IntArray(WIDTH * HEIGHT)
         for (y in 0 until HEIGHT) {
             val lat = latGrid[y]
@@ -483,10 +494,10 @@ object ProceduralTextureGenerator {
                 pixels[idx] = rgb(r, g, b)
             }
         }
-        return bitmapFromPixels(pixels, WIDTH, HEIGHT)
+        return CachedPixels(pixels, WIDTH, HEIGHT)
     }
 
-    private fun generateSaturnRing(): Bitmap {
+    private fun generateSaturnRing(): CachedPixels {
         val rw = 1024
         val rh = 64
         val pixels = IntArray(rw * rh)
@@ -540,10 +551,10 @@ object ProceduralTextureGenerator {
                 pixels[y * rw + x] = col
             }
         }
-        return bitmapFromPixels(pixels, rw, rh)
+        return CachedPixels(pixels, rw, rh)
     }
 
-    private fun generateUranus(): Bitmap {
+    private fun generateUranus(): CachedPixels {
         val pixels = IntArray(WIDTH * HEIGHT)
         for (y in 0 until HEIGHT) {
             val lat = latGrid[y]
@@ -557,10 +568,10 @@ object ProceduralTextureGenerator {
                 pixels[idx] = rgb(lerp(132f, 185f, t), lerp(208f, 232f, t), lerp(218f, 238f, t))
             }
         }
-        return bitmapFromPixels(pixels, WIDTH, HEIGHT)
+        return CachedPixels(pixels, WIDTH, HEIGHT)
     }
 
-    private fun generateNeptune(): Bitmap {
+    private fun generateNeptune(): CachedPixels {
         val pixels = IntArray(WIDTH * HEIGHT)
         for (y in 0 until HEIGHT) {
             val lat = latGrid[y]
@@ -604,7 +615,7 @@ object ProceduralTextureGenerator {
                 pixels[idx] = rgb(r, g, b)
             }
         }
-        return bitmapFromPixels(pixels, WIDTH, HEIGHT)
+        return CachedPixels(pixels, WIDTH, HEIGHT)
     }
 
     // --- Fast 3D Value Noise & fBm ---
