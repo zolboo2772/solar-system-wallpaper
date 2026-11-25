@@ -47,17 +47,15 @@ jobs:
       if: github.ref == 'refs/heads/main'
       with:
         tag_name: v1.0.2
-        name: Solar System Live Wallpaper v1.0.2 (Stability & Visual Overhaul)
+        name: Solar System Live Wallpaper v1.0.2
         body: |
-          ### 🪐 Solar System Live Wallpaper v1.0.2
-          
-          This release addresses multiple critical bugs, edge cases, and visual improvements:
-          - 🛡️ **Sphere Winding Order Fix**: Fixed inverted triangle index ordering in `MeshGenerator` so front faces are correctly CCW and never culled by back-face culling (`GL_CULL_FACE`).
-          - 🌌 **Skybox Inside-Cube Rendering**: Disabled culling during skybox pass so stars render completely around the 360° celestial sphere.
-          - 🔒 **Idempotent Surface Callbacks**: Ensured `surfaceCreated` and `surfaceDestroyed` in `WallpaperGLSurfaceView` execute safely without duplicate triggers or GLThread deadlocks.
-          - 🎨 **Enhanced High-Res Procedural Textures**: Realistic multi-layered planet textures (Earth continents, oceans, clouds, and night lights; Jupiter belts with Great Red Spot; Saturn concentric rings with Cassini division gap; Mars polar ice caps & basalt canyons).
-          - 🖐️ **In-App Touch Gesture Support**: Attached touch listeners to the interactive 3D preview view for seamless dragging, zooming, and planet inspection directly in the app.
-          - ⚡ **Zero-Division & Precision Protection**: Guarded projection matrices against zero/negative viewport dimensions and configured 24-bit depth buffers (`8-8-8-8-24-0`) for the Samsung Galaxy S25 Ultra display.
-          - 🧵 **Thread-Safe GL Teardown**: Queued OpenGL resource disposal onto the active GL thread via `glSurfaceView.queueEvent`.
+          Solar System Live Wallpaper v1.0.2 Update:
+          - Fixed sphere triangle winding order (CCW) to prevent back-face culling drops.
+          - Disabled culling during skybox rendering for full 360-degree starfield.
+          - Added idempotent surfaceCreated and surfaceDestroyed lifecycle guards.
+          - Enhanced high-resolution procedural textures for planets, rings, and sun.
+          - Added interactive touch gesture listener to 3D preview view.
+          - Guarded projection matrices against zero/negative viewport dimensions.
+          - Safely queued GL release calls onto the GL thread.
         files: SolarSystemWallpaper-v1.0.2.apk
         token: ${{ secrets.GITHUB_TOKEN }}
