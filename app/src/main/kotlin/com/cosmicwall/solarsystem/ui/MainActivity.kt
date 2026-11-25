@@ -35,15 +35,20 @@ class MainActivity : AppCompatActivity() {
             planets = ren.planets
             onPlanetTapped = { planet ->
                 renderer?.showPlanetLabel(planet)
+                Toast.makeText(this@MainActivity, "🪐 ${planet.config.name} selected (Double-tap to reset view)", Toast.LENGTH_SHORT).show()
             }
         }
 
         binding.glPreviewView.apply {
             setEGLContextClientVersion(3)
-            setEGLConfigChooser(true)
+            setEGLConfigChooser(8, 8, 8, 8, 24, 0)
             setPreserveEGLContextOnPause(true)
             setRenderer(ren)
             renderMode = GLSurfaceView.RENDERMODE_CONTINUOUSLY
+            setOnTouchListener { v, event ->
+                v.performClick()
+                touchHandler?.onTouchEvent(event) ?: false
+            }
         }
 
         binding.btnSetWallpaper.setOnClickListener {
@@ -87,6 +92,8 @@ class MainActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        renderer?.release()
+        binding.glPreviewView.queueEvent {
+            renderer?.release()
+        }
     }
 }

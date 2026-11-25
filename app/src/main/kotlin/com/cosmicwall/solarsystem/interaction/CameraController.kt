@@ -103,7 +103,9 @@ class CameraController {
     }
 
     fun updateProjection(width: Int, height: Int) {
-        val aspect = width.toFloat() / height.toFloat()
+        val w = if (width <= 0) 1 else width
+        val h = if (height <= 0) 1 else height
+        val aspect = w.toFloat() / h.toFloat()
         Matrix.perspectiveM(projectionMatrix, 0, 45f, aspect, 0.1f, 100f)
     }
 }

@@ -51,6 +51,8 @@ class SolarSystemRenderer(
 
         GLES32.glClearColor(0f, 0f, 0f, 1f)
         GLES32.glEnable(GLES32.GL_DEPTH_TEST)
+        GLES32.glDepthFunc(GLES32.GL_LEQUAL)
+        GLES32.glFrontFace(GLES32.GL_CCW)
         GLES32.glEnable(GLES32.GL_CULL_FACE)
         GLES32.glCullFace(GLES32.GL_BACK)
 
@@ -83,9 +85,11 @@ class SolarSystemRenderer(
     }
 
     override fun onSurfaceChanged(gl: GL10?, width: Int, height: Int) {
-        GLES32.glViewport(0, 0, width, height)
-        camera.updateProjection(width, height)
-        rayCaster.setViewport(width, height)
+        val w = if (width <= 0) 1 else width
+        val h = if (height <= 0) 1 else height
+        GLES32.glViewport(0, 0, w, h)
+        camera.updateProjection(w, h)
+        rayCaster.setViewport(w, h)
     }
 
     override fun onDrawFrame(gl: GL10?) {

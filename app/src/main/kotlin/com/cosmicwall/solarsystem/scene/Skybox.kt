@@ -42,6 +42,8 @@ class Skybox {
              starDensity: Float, time: Float) {
         shader.use()
 
+        // Disable face culling when rendering skybox from inside
+        GLES32.glDisable(GLES32.GL_CULL_FACE)
         GLES32.glDepthFunc(GLES32.GL_LEQUAL)
         GLES32.glDepthMask(false)
 
@@ -59,6 +61,7 @@ class Skybox {
         GLES32.glDisableVertexAttribArray(0)
         GLES32.glDepthMask(true)
         GLES32.glDepthFunc(GLES32.GL_LESS)
+        GLES32.glEnable(GLES32.GL_CULL_FACE)
     }
 
     fun release() {

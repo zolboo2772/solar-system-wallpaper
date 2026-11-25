@@ -56,13 +56,14 @@ object MeshGenerator {
                 val first = (lat * (lonSegments + 1) + lon).toShort()
                 val second = (first + lonSegments + 1).toShort()
 
+                // Front-facing counter-clockwise winding order (CCW)
                 indices.add(first)
-                indices.add(second)
                 indices.add((first + 1).toShort())
+                indices.add(second)
 
                 indices.add(second)
-                indices.add((second + 1).toShort())
                 indices.add((first + 1).toShort())
+                indices.add((second + 1).toShort())
             }
         }
 

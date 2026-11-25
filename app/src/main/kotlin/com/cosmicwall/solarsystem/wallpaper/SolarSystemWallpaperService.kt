@@ -39,7 +39,7 @@ class SolarSystemWallpaperService : WallpaperService() {
 
             glSurfaceView = WallpaperGLSurfaceView(applicationContext).apply {
                 setEGLContextClientVersion(3)
-                setEGLConfigChooser(true)
+                setEGLConfigChooser(8, 8, 8, 8, 24, 0)
                 setPreserveEGLContextOnPause(true)
                 setRenderer(ren)
                 renderMode = GLSurfaceView.RENDERMODE_CONTINUOUSLY
@@ -91,17 +91,35 @@ class SolarSystemWallpaperService : WallpaperService() {
 
         override fun onDestroy() {
             super.onDestroy()
+            glSurfaceView?.queueEvent {
+                renderer?.release()
+            }
             glSurfaceView?.onPause()
             glSurfaceView?.onWallpaperDestroy()
-            renderer?.release()
             glSurfaceView = null
             renderer = null
             touchHandler = null
         }
 
         inner class WallpaperGLSurfaceView(context: Context) : GLSurfaceView(context) {
+            private var hasSurface = false
+
             override fun getHolder(): SurfaceHolder {
                 return surfaceHolder
+            }
+
+            override fun surfaceCreated(holder: SurfaceHolder) {
+                if (!hasSurface) {
+                    hasSurface = true
+                    super.surfaceCreated(holder)
+                }
+            }
+
+            override fun surfaceDestroyed(holder: SurfaceHolder) {
+                if (hasSurface) {
+                    hasSurface = false
+                    super.surfaceDestroyed(holder)
+                }
             }
 
             fun onWallpaperDestroy() {
