@@ -76,9 +76,9 @@ class SolarSystemRenderer(
             prefs.sphereSegmentsLon
         )
         ringMesh = MeshGenerator.generateRingDisk(
-            innerRadius = 0.5f,
-            outerRadius = 1.1f,
-            segments = 128
+            innerRadius = 0.486f,
+            outerRadius = 0.931f,
+            segments = 160
         )
 
         skybox.init()

@@ -3,11 +3,9 @@ package com.cosmicwall.solarsystem.wallpaper
 import android.content.Context
 import android.opengl.GLSurfaceView
 import android.service.wallpaper.WallpaperService
-import android.view.MotionEvent
 import android.view.SurfaceHolder
 import com.cosmicwall.solarsystem.interaction.CameraController
 import com.cosmicwall.solarsystem.interaction.RayCaster
-import com.cosmicwall.solarsystem.interaction.TouchHandler
 import com.cosmicwall.solarsystem.renderer.SolarSystemRenderer
 
 class SolarSystemWallpaperService : WallpaperService() {
@@ -19,23 +17,16 @@ class SolarSystemWallpaperService : WallpaperService() {
     inner class GLEngine : Engine() {
         private var glSurfaceView: WallpaperGLSurfaceView? = null
         private var renderer: SolarSystemRenderer? = null
-        private var touchHandler: TouchHandler? = null
 
         override fun onCreate(surfaceHolder: SurfaceHolder) {
             super.onCreate(surfaceHolder)
-            setTouchEventsEnabled(true)
+            // Do not intercept home screen touch/drag events; only react to page swipes (onOffsetsChanged) and unlock
+            setTouchEventsEnabled(false)
 
             val camera = CameraController()
             val rayCaster = RayCaster()
             val ren = SolarSystemRenderer(applicationContext, camera, rayCaster)
             renderer = ren
-
-            touchHandler = TouchHandler(applicationContext, camera, rayCaster).apply {
-                planets = ren.planets
-                onPlanetTapped = { planet ->
-                    renderer?.showPlanetLabel(planet)
-                }
-            }
 
             glSurfaceView = WallpaperGLSurfaceView(applicationContext).apply {
                 setEGLContextClientVersion(3)
@@ -87,11 +78,6 @@ class SolarSystemWallpaperService : WallpaperService() {
             renderer?.camera?.onOffsetChanged(xOffset)
         }
 
-        override fun onTouchEvent(event: MotionEvent?) {
-            super.onTouchEvent(event)
-            event?.let { touchHandler?.onTouchEvent(it) }
-        }
-
         override fun onDestroy() {
             super.onDestroy()
             glSurfaceView?.queueEvent {
@@ -101,7 +87,6 @@ class SolarSystemWallpaperService : WallpaperService() {
             glSurfaceView?.onWallpaperDestroy()
             glSurfaceView = null
             renderer = null
-            touchHandler = null
         }
 
         inner class WallpaperGLSurfaceView(context: Context) : GLSurfaceView(context) {

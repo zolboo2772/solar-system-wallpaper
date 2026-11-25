@@ -10,6 +10,10 @@ import android.os.Bundle
 import android.view.MotionEvent
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updatePadding
 import com.cosmicwall.solarsystem.data.WallpaperPreferences
 import com.cosmicwall.solarsystem.databinding.ActivityMainBinding
 import com.cosmicwall.solarsystem.interaction.CameraController
@@ -24,12 +28,27 @@ class MainActivity : AppCompatActivity() {
     private var renderer: SolarSystemRenderer? = null
     private var touchHandler: TouchHandler? = null
 
+    private val planetMetadata = mapOf(
+        "all" to ("Solar System" to "8 Planets • Heliocentric 3D Orbit"),
+        "Earth" to ("Earth" to "3rd Planet • 149.6M km • 24h Day"),
+        "Saturn" to ("Saturn" to "6th Planet • 1.43B km • Cassini Rings"),
+        "Mars" to ("Mars" to "4th Planet • 227.9M km • Red Planet"),
+        "Jupiter" to ("Jupiter" to "5th Planet • 778.5M km • Gas Giant"),
+        "Sun" to ("The Sun" to "G-Type Star • 5,778 K Photosphere"),
+        "Venus" to ("Venus" to "2nd Planet • 108.2M km • Dense Cloud"),
+        "Mercury" to ("Mercury" to "1st Planet • 57.9M km • Cratered World"),
+        "Uranus" to ("Uranus" to "7th Planet • 2.87B km • Ice Giant"),
+        "Neptune" to ("Neptune" to "8th Planet • 4.50B km • Supersonic Winds")
+    )
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        WindowCompat.setDecorFitsSystemWindows(window, false)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Setup live 3D preview directly in the app
+        applyEdgeToEdgeInsets()
+
         val camera = CameraController()
         val rayCaster = RayCaster()
         val ren = SolarSystemRenderer(this, camera, rayCaster)
@@ -39,7 +58,7 @@ class MainActivity : AppCompatActivity() {
             planets = ren.planets
             onPlanetTapped = { planet ->
                 renderer?.showPlanetLabel(planet)
-                Toast.makeText(this@MainActivity, "🪐 ${planet.config.name} selected (Double-tap to reset view)", Toast.LENGTH_SHORT).show()
+                updateHeader(planet.config.name)
             }
         }
 
@@ -65,11 +84,14 @@ class MainActivity : AppCompatActivity() {
                 }
                 startActivity(intent)
             } catch (e: Exception) {
-                // Fallback for devices where ACTION_CHANGE_LIVE_WALLPAPER needs standard chooser
                 try {
                     startActivity(Intent(WallpaperManager.ACTION_LIVE_WALLPAPER_CHOOSER))
                 } catch (e2: Exception) {
-                    Toast.makeText(this@MainActivity, "Please select Solar System in your device Wallpaper settings", Toast.LENGTH_LONG).show()
+                    Toast.makeText(
+                        this@MainActivity,
+                        "Please select Solar System in your device Wallpaper settings",
+                        Toast.LENGTH_LONG
+                    ).show()
                 }
             }
         }
@@ -78,46 +100,78 @@ class MainActivity : AppCompatActivity() {
             startActivity(Intent(this, SettingsActivity::class.java))
         }
 
+        binding.btnReplayZoom.setOnClickListener {
+            ren.onWallpaperUnlocked()
+        }
+
         setupPlanetSelector(ren)
     }
 
+    private fun applyEdgeToEdgeInsets() {
+        val topBase = resources.displayMetrics.density * 16
+        val bottomBase = resources.displayMetrics.density * 24
+
+        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { _, insets ->
+            val sysBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            binding.topBar.updatePadding(top = sysBars.top + topBase.toInt())
+            binding.bottomBar.updatePadding(bottom = sysBars.bottom + bottomBase.toInt())
+            insets
+        }
+    }
+
+    private fun updateHeader(planetId: String) {
+        val (title, subtitle) = planetMetadata[planetId] ?: (planetId to "Interactive 3D Planet")
+        binding.tvPlanetTitle.text = title
+        binding.tvPlanetSubtitle.text = subtitle
+    }
+
     private fun setupPlanetSelector(ren: SolarSystemRenderer) {
-        val prefs = WallpaperPreferences(this)
-        val currentSelection = prefs.selectedPlanet
+        val currentSelection = WallpaperPreferences(this).selectedPlanet
+        updateHeader(currentSelection)
 
         val options = listOf(
-            "all" to "🌌 Solar System",
-            "Earth" to "🌍 Earth",
-            "Saturn" to "🪐 Saturn",
-            "Mars" to "🔴 Mars",
-            "Jupiter" to "🟠 Jupiter",
-            "Sun" to "☀️ Sun",
-            "Venus" to "🟡 Venus",
-            "Mercury" to "🪨 Mercury",
-            "Uranus" to "🩵 Uranus",
-            "Neptune" to "🔵 Neptune"
+            "all" to "Solar System",
+            "Earth" to "Earth",
+            "Saturn" to "Saturn",
+            "Mars" to "Mars",
+            "Jupiter" to "Jupiter",
+            "Sun" to "Sun",
+            "Venus" to "Venus",
+            "Mercury" to "Mercury",
+            "Uranus" to "Uranus",
+            "Neptune" to "Neptune"
         )
 
         val chipBgStates = ColorStateList(
             arrayOf(intArrayOf(android.R.attr.state_checked), intArrayOf()),
-            intArrayOf(Color.parseColor("#FF5C6BC0"), Color.parseColor("#33FFFFFF"))
+            intArrayOf(Color.parseColor("#FF4A66F5"), Color.parseColor("#1FFFFFFF"))
+        )
+        val chipStrokeStates = ColorStateList(
+            arrayOf(intArrayOf(android.R.attr.state_checked), intArrayOf()),
+            intArrayOf(Color.parseColor("#FF8FA8FF"), Color.parseColor("#33FFFFFF"))
         )
         val chipTextStates = ColorStateList(
             arrayOf(intArrayOf(android.R.attr.state_checked), intArrayOf()),
-            intArrayOf(Color.WHITE, Color.parseColor("#DDFFFFFF"))
+            intArrayOf(Color.WHITE, Color.parseColor("#CCFFFFFF"))
         )
 
+        val density = resources.displayMetrics.density
         binding.chipGroupPlanets.removeAllViews()
         for ((id, label) in options) {
             val chip = Chip(this).apply {
                 tag = id
                 text = label
                 isCheckable = true
+                isCheckedIconVisible = false
                 isChecked = id.equals(currentSelection, ignoreCase = true)
                 chipBackgroundColor = chipBgStates
+                chipStrokeColor = chipStrokeStates
+                chipStrokeWidth = density * 1f
+                chipCornerRadius = density * 20f
                 setTextColor(chipTextStates)
-                chipStrokeWidth = 0f
+                textSize = 13f
                 setOnClickListener {
+                    updateHeader(id)
                     ren.selectPlanet(id)
                     ren.onWallpaperUnlocked()
                 }
@@ -134,6 +188,7 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         val current = WallpaperPreferences(this).selectedPlanet
+        updateHeader(current)
         for (i in 0 until binding.chipGroupPlanets.childCount) {
             val chip = binding.chipGroupPlanets.getChildAt(i) as? Chip ?: continue
             if ((chip.tag as? String).equals(current, ignoreCase = true) && !chip.isChecked) {

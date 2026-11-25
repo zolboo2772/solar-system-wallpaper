@@ -4,7 +4,7 @@ import android.opengl.GLES32
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.nio.FloatBuffer
-import java.nio.ShortBuffer
+import java.nio.IntBuffer
 import kotlin.math.cos
 import kotlin.math.sin
 import kotlin.math.PI
@@ -18,9 +18,9 @@ class Mesh(
 
 object MeshGenerator {
 
-    fun generateSphere(latSegments: Int = 48, lonSegments: Int = 96): Mesh {
+    fun generateSphere(latSegments: Int = 64, lonSegments: Int = 128): Mesh {
         val vertices = mutableListOf<Float>()
-        val indices = mutableListOf<Short>()
+        val indices = mutableListOf<Int>()
 
         for (lat in 0..latSegments) {
             val theta = lat * PI.toFloat() / latSegments
@@ -53,26 +53,26 @@ object MeshGenerator {
 
         for (lat in 0 until latSegments) {
             for (lon in 0 until lonSegments) {
-                val first = (lat * (lonSegments + 1) + lon).toShort()
-                val second = (first + lonSegments + 1).toShort()
+                val first = lat * (lonSegments + 1) + lon
+                val second = first + lonSegments + 1
 
                 // Front-facing counter-clockwise winding order (CCW)
                 indices.add(first)
-                indices.add((first + 1).toShort())
+                indices.add(first + 1)
                 indices.add(second)
 
                 indices.add(second)
-                indices.add((first + 1).toShort())
-                indices.add((second + 1).toShort())
+                indices.add(first + 1)
+                indices.add(second + 1)
             }
         }
 
-        return uploadMesh(vertices.toFloatArray(), indices.toShortArray(), 12 * 4)
+        return uploadMesh(vertices.toFloatArray(), indices.toIntArray(), 12 * 4)
     }
 
-    fun generateRingDisk(innerRadius: Float, outerRadius: Float, segments: Int = 128): Mesh {
+    fun generateRingDisk(innerRadius: Float, outerRadius: Float, segments: Int = 160): Mesh {
         val vertices = mutableListOf<Float>()
-        val indices = mutableListOf<Short>()
+        val indices = mutableListOf<Int>()
 
         for (i in 0..segments) {
             val angle = i * 2f * PI.toFloat() / segments
@@ -87,20 +87,20 @@ object MeshGenerator {
         }
 
         for (i in 0 until segments) {
-            val idx = (i * 2).toShort()
+            val idx = i * 2
             indices.add(idx)
-            indices.add((idx + 1).toShort())
-            indices.add((idx + 2).toShort())
+            indices.add(idx + 1)
+            indices.add(idx + 2)
 
-            indices.add((idx + 1).toShort())
-            indices.add((idx + 3).toShort())
-            indices.add((idx + 2).toShort())
+            indices.add(idx + 1)
+            indices.add(idx + 3)
+            indices.add(idx + 2)
         }
 
-        return uploadMesh(vertices.toFloatArray(), indices.toShortArray(), 5 * 4)
+        return uploadMesh(vertices.toFloatArray(), indices.toIntArray(), 5 * 4)
     }
 
-    private fun uploadMesh(vertices: FloatArray, indices: ShortArray, stride: Int): Mesh {
+    private fun uploadMesh(vertices: FloatArray, indices: IntArray, stride: Int): Mesh {
         val vboIds = IntArray(1)
         val iboIds = IntArray(1)
 
@@ -116,14 +116,14 @@ object MeshGenerator {
         GLES32.glBindBuffer(GLES32.GL_ARRAY_BUFFER, vboIds[0])
         GLES32.glBufferData(GLES32.GL_ARRAY_BUFFER, vertices.size * 4, vertexBuffer, GLES32.GL_STATIC_DRAW)
 
-        val indexBuffer: ShortBuffer = ByteBuffer.allocateDirect(indices.size * 2)
+        val indexBuffer: IntBuffer = ByteBuffer.allocateDirect(indices.size * 4)
             .order(ByteOrder.nativeOrder())
-            .asShortBuffer()
+            .asIntBuffer()
             .put(indices)
         indexBuffer.position(0)
 
         GLES32.glBindBuffer(GLES32.GL_ELEMENT_ARRAY_BUFFER, iboIds[0])
-        GLES32.glBufferData(GLES32.GL_ELEMENT_ARRAY_BUFFER, indices.size * 2, indexBuffer, GLES32.GL_STATIC_DRAW)
+        GLES32.glBufferData(GLES32.GL_ELEMENT_ARRAY_BUFFER, indices.size * 4, indexBuffer, GLES32.GL_STATIC_DRAW)
 
         return Mesh(vboIds[0], iboIds[0], indices.size, stride)
     }

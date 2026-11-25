@@ -21,15 +21,15 @@ class WallpaperPreferences(context: Context) {
     val starDensity: Float get() = prefs.getInt("star_density", 70).toFloat()
 
     val sphereSegmentsLat: Int get() = when (quality) {
-        "low" -> 24
-        "medium" -> 48
-        else -> 64
+        "low" -> 32
+        "medium" -> 64
+        else -> 96
     }
 
     val sphereSegmentsLon: Int get() = when (quality) {
-        "low" -> 48
-        "medium" -> 96
-        else -> 128
+        "low" -> 64
+        "medium" -> 128
+        else -> 192
     }
 
     fun registerListener(listener: SharedPreferences.OnSharedPreferenceChangeListener) {

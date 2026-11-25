@@ -1,12 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="Theme.SolarSystem" parent="Theme.Material3.DayNight.NoActionBar">
-        <item name="colorPrimary">#FF1A237E</item>
-        <item name="colorPrimaryVariant">#FF0D47A1</item>
+    <style name="Theme.SolarSystem" parent="Theme.Material3.Dark.NoActionBar">
+        <item name="colorPrimary">#FF5C7CFA</item>
         <item name="colorOnPrimary">#FFFFFFFF</item>
-        <item name="colorSecondary">#FF00BCD4</item>
+        <item name="colorSecondary">#FF38BDF8</item>
         <item name="colorOnSecondary">#FF000000</item>
-        <item name="android:statusBarColor">?attr/colorPrimary</item>
-        <item name="android:navigationBarColor">#FF000000</item>
+        <item name="android:windowBackground">#FF03050C</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar">false</item>
+    </style>
+
+    <style name="Theme.SolarSystem.Settings" parent="Theme.Material3.Dark">
+        <item name="colorPrimary">#FF5C7CFA</item>
+        <item name="android:windowBackground">#FF060914</item>
+        <item name="android:statusBarColor">#FF060914</item>
+        <item name="android:navigationBarColor">#FF060914</item>
     </style>
 </resources>

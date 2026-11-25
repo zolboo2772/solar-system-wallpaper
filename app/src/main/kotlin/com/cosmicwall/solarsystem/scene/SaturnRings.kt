@@ -50,7 +50,7 @@ class SaturnRings {
         GLES32.glEnableVertexAttribArray(1)
         GLES32.glVertexAttribPointer(1, 2, GLES32.GL_FLOAT, false, stride, 3 * 4)
 
-        GLES32.glDrawElements(GLES32.GL_TRIANGLES, ringMesh.indexCount, GLES32.GL_UNSIGNED_SHORT, 0)
+        GLES32.glDrawElements(GLES32.GL_TRIANGLES, ringMesh.indexCount, GLES32.GL_UNSIGNED_INT, 0)
 
         GLES32.glDisableVertexAttribArray(0)
         GLES32.glDisableVertexAttribArray(1)

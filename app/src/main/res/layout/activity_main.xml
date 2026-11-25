@@ -4,54 +4,117 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FF000008">
+    android:background="#FF02030A">
 
     <android.opengl.GLSurfaceView
         android:id="@+id/glPreviewView"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-    <!-- Bottom gradient so buttons and text stand out clearly -->
+    <!-- Smooth top gradient scrim -->
     <View
         android:layout_width="match_parent"
-        android:layout_height="290dp"
-        android:background="#BB000008"
+        android:layout_height="180dp"
+        android:background="@drawable/bg_top_scrim"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- Top floating HUD -->
+    <LinearLayout
+        android:id="@+id/topBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingStart="24dp"
+        android:paddingEnd="20dp"
+        android:paddingTop="16dp"
+        android:paddingBottom="12dp"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="COSMOS • SUPER WALLPAPER"
+                android:textSize="11sp"
+                android:letterSpacing="0.16"
+                android:textColor="#99B4C6FF"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tvPlanetTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Earth"
+                android:textSize="32sp"
+                android:fontFamily="sans-serif-light"
+                android:textColor="#FFFFFFFF"
+                android:layout_marginTop="2dp" />
+
+            <TextView
+                android:id="@+id/tvPlanetSubtitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="3rd Planet • 149.6M km • 24h Day"
+                android:textSize="13sp"
+                android:textColor="#B3DCE4FF"
+                android:layout_marginTop="2dp" />
+
+        </LinearLayout>
+
+        <ImageButton
+            android:id="@+id/btnReplayZoom"
+            android:layout_width="42dp"
+            android:layout_height="42dp"
+            android:background="@drawable/bg_glass_circle"
+            android:src="@android:drawable/ic_menu_rotate"
+            android:contentDescription="Replay Zoom"
+            app:tint="#FFFFFFFF"
+            android:padding="10dp"
+            android:layout_marginEnd="10dp" />
+
+        <ImageButton
+            android:id="@+id/btnSettings"
+            android:layout_width="42dp"
+            android:layout_height="42dp"
+            android:background="@drawable/bg_glass_circle"
+            android:src="@android:drawable/ic_menu_preferences"
+            android:contentDescription="@string/open_settings"
+            app:tint="#FFFFFFFF"
+            android:padding="10dp" />
+
+    </LinearLayout>
+
+    <!-- Smooth bottom gradient scrim -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="230dp"
+        android:background="@drawable/bg_bottom_scrim"
         app:layout_constraintBottom_toBottomOf="parent" />
 
+    <!-- Bottom floating control dock -->
     <LinearLayout
+        android:id="@+id/bottomBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:gravity="center"
         android:paddingStart="20dp"
         android:paddingEnd="20dp"
         android:paddingTop="12dp"
         android:paddingBottom="24dp"
         app:layout_constraintBottom_toBottomOf="parent">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="☀️ Solar System 3D"
-            android:textSize="24sp"
-            android:textColor="#FFFFFFFF"
-            android:textStyle="bold"
-            android:layout_marginBottom="2dp" />
-
-        <TextView
-            android:id="@+id/tvSubtitle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Drag to orbit • Pinch to zoom • Tap a planet below"
-            android:textSize="13sp"
-            android:textColor="#B3FFFFFF"
-            android:layout_marginBottom="12dp" />
-
         <HorizontalScrollView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:scrollbars="none"
-            android:layout_marginBottom="14dp">
+            android:clipToPadding="false"
+            android:layout_marginBottom="16dp">
 
             <com.google.android.material.chip.ChipGroup
                 android:id="@+id/chipGroupPlanets"
@@ -59,28 +122,23 @@
                 android:layout_height="wrap_content"
                 app:singleSelection="true"
                 app:selectionRequired="true"
-                app:singleLine="true" />
+                app:singleLine="true"
+                app:chipSpacingHorizontal="8dp" />
 
         </HorizontalScrollView>
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnSetWallpaper"
             android:layout_width="match_parent"
-            android:layout_height="52dp"
+            android:layout_height="54dp"
             android:text="@string/set_wallpaper"
-            android:textSize="16sp"
-            app:cornerRadius="26dp"
-            android:layout_marginBottom="10dp" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnSettings"
-            android:layout_width="match_parent"
-            android:layout_height="46dp"
-            android:text="@string/open_settings"
-            android:textSize="14sp"
-            style="@style/Widget.Material3.Button.OutlinedButton"
-            app:cornerRadius="23dp"
-            app:strokeColor="#80FFFFFF" />
+            android:textSize="15sp"
+            android:textStyle="bold"
+            android:letterSpacing="0.04"
+            android:textColor="#FFFFFFFF"
+            app:backgroundTint="#FF4A66F5"
+            app:cornerRadius="27dp"
+            app:elevation="6dp" />
 
     </LinearLayout>
 

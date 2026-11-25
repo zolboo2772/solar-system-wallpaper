@@ -17,8 +17,8 @@ import kotlin.math.sqrt
  */
 object ProceduralTextureGenerator {
 
-    private const val WIDTH = 512
-    private const val HEIGHT = 256
+    private const val WIDTH = 1024
+    private const val HEIGHT = 512
 
     // Precomputed unit-sphere coordinates for the 512x256 equirectangular grid
     private val sphereX: FloatArray
@@ -129,11 +129,12 @@ object ProceduralTextureGenerator {
 
                 if (h <= 0f) {
                     // Ocean bathymetry: shallow coastal turquoise -> deep abyssal blue
+                    // Encode alpha = 50 (< 0.5) to mark glossy water for specular sun glint in planet.frag
                     val depth = (-h * 3.5f).coerceIn(0f, 1f)
-                    val r = lerp(24f, 6f, depth)
-                    val g = lerp(118f, 34f, depth)
-                    val b = lerp(175f, 96f, depth)
-                    pixels[idx] = rgb(r, g, b)
+                    val r = lerp(18f, 5f, depth)
+                    val g = lerp(108f, 28f, depth)
+                    val b = lerp(168f, 92f, depth)
+                    pixels[idx] = argb(50, r, g, b)
                 } else {
                     // Land biomes based on latitude, moisture noise, and elevation
                     val elev = (h * 2.4f).coerceIn(0f, 1f)
@@ -486,7 +487,7 @@ object ProceduralTextureGenerator {
     }
 
     private fun generateSaturnRing(): Bitmap {
-        val rw = 512
+        val rw = 1024
         val rh = 64
         val pixels = IntArray(rw * rh)
         for (x in 0 until rw) {
@@ -673,6 +674,9 @@ object ProceduralTextureGenerator {
 
     private fun rgb(r: Float, g: Float, b: Float): Int =
         Color.argb(255, r.toInt().coerceIn(0, 255), g.toInt().coerceIn(0, 255), b.toInt().coerceIn(0, 255))
+
+    private fun argb(a: Int, r: Float, g: Float, b: Float): Int =
+        Color.argb(a.coerceIn(0, 255), r.toInt().coerceIn(0, 255), g.toInt().coerceIn(0, 255), b.toInt().coerceIn(0, 255))
 
     private fun bitmapFromPixels(pixels: IntArray, width: Int, height: Int): Bitmap {
         val bmp = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)

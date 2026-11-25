@@ -35,7 +35,8 @@
         <activity
             android:name=".ui.SettingsActivity"
             android:exported="false"
-            android:theme="@style/Theme.SolarSystem" />
+            android:label="@string/open_settings"
+            android:theme="@style/Theme.SolarSystem.Settings" />
 
     </application>
 

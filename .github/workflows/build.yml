@@ -33,25 +33,25 @@ jobs:
 
     - name: Rename APK for Release
       run: |
-        cp app/build/outputs/apk/debug/app-debug.apk SolarSystemWallpaper-v1.0.3.apk
+        cp app/build/outputs/apk/debug/app-debug.apk SolarSystemWallpaper-v1.0.4.apk
 
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
       with:
-        name: SolarSystemWallpaper-v1.0.3-APK
-        path: SolarSystemWallpaper-v1.0.3.apk
+        name: SolarSystemWallpaper-v1.0.4-APK
+        path: SolarSystemWallpaper-v1.0.4.apk
         retention-days: 30
 
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v2
       if: github.ref == 'refs/heads/main'
       with:
-        tag_name: v1.0.3
-        name: Solar System Live Wallpaper v1.0.3
+        tag_name: v1.0.4
+        name: Solar System Live Wallpaper v1.0.4
         body: |
-          Solar System Live Wallpaper v1.0.3 (Super Wallpaper & Procedural Textures):
-          - Added Xiaomi Super Wallpaper style unlock zoom-in flyover and home-screen swipe orbital sweep.
-          - Added planet selector bar in the main app and Settings (Earth, Saturn, Mars, Jupiter, Sun, Mercury, Venus, Uranus, Neptune, or All Solar System).
-          - Upgraded all planet textures to seamless 3D spherical fBm procedural generation (continents, ocean bathymetry, topographic normal map, city night lights, clouds, Jupiter Great Red Spot, Saturn Cassini-division rings, Mars craters & polar caps).
-        files: SolarSystemWallpaper-v1.0.3.apk
+          Solar System Live Wallpaper v1.0.4:
+          - Disabled touch interaction on the live wallpaper itself so home screen gestures and icons are never interrupted (only page-swipe parallax & unlock zoom remain active).
+          - Upgraded procedural textures to 1024x512 + GPU micro-detail, linear-space PBR lighting, ACES Filmic tone mapping, Earth ocean specular glint, and accurate Saturn ring shadows.
+          - Redesigned app UI with true edge-to-edge glassmorphic HUD, dynamic planet telemetry, and clean selector pills.
+        files: SolarSystemWallpaper-v1.0.4.apk
         token: ${{ secrets.GITHUB_TOKEN }}

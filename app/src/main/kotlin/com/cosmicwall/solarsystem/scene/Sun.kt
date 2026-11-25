@@ -55,7 +55,7 @@ class Sun {
         GLES32.glEnableVertexAttribArray(3)
         GLES32.glVertexAttribPointer(3, 4, GLES32.GL_FLOAT, false, stride, 8 * 4)
 
-        GLES32.glDrawElements(GLES32.GL_TRIANGLES, sphereMesh.indexCount, GLES32.GL_UNSIGNED_SHORT, 0)
+        GLES32.glDrawElements(GLES32.GL_TRIANGLES, sphereMesh.indexCount, GLES32.GL_UNSIGNED_INT, 0)
 
         GLES32.glDisableVertexAttribArray(0)
         GLES32.glDisableVertexAttribArray(1)

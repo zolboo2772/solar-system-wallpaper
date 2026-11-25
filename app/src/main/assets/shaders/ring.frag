@@ -15,16 +15,20 @@ void main() {
     vec4 ringColor = texture(u_ringTexture, v_texCoord);
     if (ringColor.a < 0.01) discard;
 
+    vec3 linearRing = pow(ringColor.rgb, vec3(2.2));
     vec3 L = normalize(-u_lightDirection);
-    float light = max(dot(vec3(0.0, 1.0, 0.0), L), 0.0) * 0.5 + 0.5;
+    float light = 0.85 + 0.25 * abs(L.y);
 
+    // Accurate cylindrical shadow cast by Saturn onto its rings
     vec3 toFrag = v_worldPosition - u_planetCenter;
-    float distFromAxis = length(toFrag.xz);
-    float projOnLight = dot(normalize(toFrag), L);
-    if (distFromAxis < u_planetRadius && projOnLight < 0.0) {
-        light *= 0.15;
+    float alongLight = dot(toFrag, L);
+    if (alongLight < 0.0) {
+        float perpDist = length(toFrag - L * alongLight);
+        float shadow = smoothstep(u_planetRadius * 0.96, u_planetRadius * 1.04, perpDist);
+        light *= mix(0.08, 1.0, shadow);
     }
 
-    ringColor.rgb *= light;
-    fragColor = ringColor;
+    vec3 lit = linearRing * light;
+    lit = pow(lit, vec3(1.0 / 2.2));
+    fragColor = vec4(lit, ringColor.a);
 }
