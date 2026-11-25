@@ -3,17 +3,21 @@ package com.cosmicwall.solarsystem.ui
 import android.app.WallpaperManager
 import android.content.ComponentName
 import android.content.Intent
+import android.content.res.ColorStateList
+import android.graphics.Color
 import android.opengl.GLSurfaceView
 import android.os.Bundle
 import android.view.MotionEvent
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.cosmicwall.solarsystem.data.WallpaperPreferences
 import com.cosmicwall.solarsystem.databinding.ActivityMainBinding
 import com.cosmicwall.solarsystem.interaction.CameraController
 import com.cosmicwall.solarsystem.interaction.RayCaster
 import com.cosmicwall.solarsystem.interaction.TouchHandler
 import com.cosmicwall.solarsystem.renderer.SolarSystemRenderer
 import com.cosmicwall.solarsystem.wallpaper.SolarSystemWallpaperService
+import com.google.android.material.chip.Chip
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
@@ -73,6 +77,53 @@ class MainActivity : AppCompatActivity() {
         binding.btnSettings.setOnClickListener {
             startActivity(Intent(this, SettingsActivity::class.java))
         }
+
+        setupPlanetSelector(ren)
+    }
+
+    private fun setupPlanetSelector(ren: SolarSystemRenderer) {
+        val prefs = WallpaperPreferences(this)
+        val currentSelection = prefs.selectedPlanet
+
+        val options = listOf(
+            "all" to "🌌 Solar System",
+            "Earth" to "🌍 Earth",
+            "Saturn" to "🪐 Saturn",
+            "Mars" to "🔴 Mars",
+            "Jupiter" to "🟠 Jupiter",
+            "Sun" to "☀️ Sun",
+            "Venus" to "🟡 Venus",
+            "Mercury" to "🪨 Mercury",
+            "Uranus" to "🩵 Uranus",
+            "Neptune" to "🔵 Neptune"
+        )
+
+        val chipBgStates = ColorStateList(
+            arrayOf(intArrayOf(android.R.attr.state_checked), intArrayOf()),
+            intArrayOf(Color.parseColor("#FF5C6BC0"), Color.parseColor("#33FFFFFF"))
+        )
+        val chipTextStates = ColorStateList(
+            arrayOf(intArrayOf(android.R.attr.state_checked), intArrayOf()),
+            intArrayOf(Color.WHITE, Color.parseColor("#DDFFFFFF"))
+        )
+
+        binding.chipGroupPlanets.removeAllViews()
+        for ((id, label) in options) {
+            val chip = Chip(this).apply {
+                tag = id
+                text = label
+                isCheckable = true
+                isChecked = id.equals(currentSelection, ignoreCase = true)
+                chipBackgroundColor = chipBgStates
+                setTextColor(chipTextStates)
+                chipStrokeWidth = 0f
+                setOnClickListener {
+                    ren.selectPlanet(id)
+                    ren.onWallpaperUnlocked()
+                }
+            }
+            binding.chipGroupPlanets.addView(chip)
+        }
     }
 
     override fun onTouchEvent(event: MotionEvent?): Boolean {
@@ -82,6 +133,13 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+        val current = WallpaperPreferences(this).selectedPlanet
+        for (i in 0 until binding.chipGroupPlanets.childCount) {
+            val chip = binding.chipGroupPlanets.getChildAt(i) as? Chip ?: continue
+            if ((chip.tag as? String).equals(current, ignoreCase = true) && !chip.isChecked) {
+                chip.isChecked = true
+            }
+        }
         binding.glPreviewView.onResume()
     }
 

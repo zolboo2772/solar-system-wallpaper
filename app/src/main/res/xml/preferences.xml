@@ -3,6 +3,20 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <ListPreference
+        android:key="selected_planet"
+        android:title="@string/pref_planet_title"
+        android:summary="@string/pref_planet_summary"
+        android:entries="@array/planet_entries"
+        android:entryValues="@array/planet_values"
+        android:defaultValue="Earth" />
+
+    <SwitchPreferenceCompat
+        android:key="unlock_zoom_effect"
+        android:title="@string/pref_unlock_zoom_title"
+        android:summary="@string/pref_unlock_zoom_summary"
+        android:defaultValue="true" />
+
+    <ListPreference
         android:key="quality"
         android:title="@string/pref_quality_title"
         android:summary="@string/pref_quality_summary"

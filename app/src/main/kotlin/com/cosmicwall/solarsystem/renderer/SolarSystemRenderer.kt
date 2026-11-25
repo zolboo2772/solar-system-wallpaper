@@ -46,6 +46,12 @@ class SolarSystemRenderer(
     var labelAlpha = 0f
     private var labelTimer = 0f
 
+    @Volatile
+    private var pendingPlanetUpdate = false
+
+    @Volatile
+    private var pendingUnlockZoom = false
+
     override fun onSurfaceCreated(gl: GL10?, config: EGLConfig?) {
         Log.d(TAG, "Surface created - initializing GL resources")
 
@@ -79,7 +85,10 @@ class SolarSystemRenderer(
 
         planets.forEachIndexed { index, planet ->
             planet.orbitAngle = (index * 45f) + (Math.random().toFloat() * 30f)
+            planet.update(0f, 1f)
         }
+
+        applySelectedPlanet(triggerZoom = prefs.unlockZoomEffect)
 
         Log.d(TAG, "GL initialization complete")
     }
@@ -98,9 +107,22 @@ class SolarSystemRenderer(
 
         val speedMult = prefs.orbitSpeedMultiplier
         camera.isAutoRotating = prefs.autoRotate
-        camera.update(dt)
         sun.update(dt)
         planets.forEach { it.update(dt, speedMult) }
+
+        if (pendingPlanetUpdate) {
+            pendingPlanetUpdate = false
+            applySelectedPlanet(triggerZoom = true)
+        }
+        if (pendingUnlockZoom) {
+            pendingUnlockZoom = false
+            if (prefs.unlockZoomEffect) {
+                camera.triggerXiaomiUnlockZoom()
+            }
+        }
+
+        updateHeroCameraTracking()
+        camera.update(dt)
 
         if (activePlanetName != null) {
             labelAlpha = (labelAlpha + dt * 3f).coerceAtMost(1f)
@@ -161,8 +183,70 @@ class SolarSystemRenderer(
         labelTimer = 0f
     }
 
+    fun selectPlanet(name: String) {
+        if (::prefs.isInitialized) {
+            prefs.selectedPlanet = name
+        }
+        pendingPlanetUpdate = true
+    }
+
+    fun onWallpaperUnlocked() {
+        pendingUnlockZoom = true
+    }
+
+    private fun applySelectedPlanet(triggerZoom: Boolean) {
+        val selected = if (::prefs.isInitialized) prefs.selectedPlanet else "Earth"
+        when {
+            selected.equals("all", ignoreCase = true) -> {
+                camera.setSystemMode()
+            }
+            selected.equals("Sun", ignoreCase = true) -> {
+                camera.setHeroMode(distance = 2.3f, elevation = 12f)
+                camera.trackTarget(sun.position)
+            }
+            else -> {
+                val target = planets.find { it.config.name.equals(selected, ignoreCase = true) }
+                if (target != null) {
+                    val heroDist = if (target.config.name == "Saturn") {
+                        2.8f
+                    } else {
+                        target.config.radius * 4.3f
+                    }
+                    // Position camera ~65 deg off the Sun-planet line for dramatic crescent terminator lighting
+                    val sunAngleDeg = Math.toDegrees(
+                        kotlin.math.atan2(target.worldPosition.x.toDouble(), target.worldPosition.z.toDouble())
+                    ).toFloat()
+                    camera.setHeroMode(distance = heroDist, elevation = 14f, azimuthHint = sunAngleDeg + 115f)
+                    camera.trackTarget(target.worldPosition)
+                } else {
+                    camera.setSystemMode()
+                }
+            }
+        }
+        if (triggerZoom) {
+            camera.triggerXiaomiUnlockZoom()
+        }
+    }
+
+    private fun updateHeroCameraTracking() {
+        if (!::prefs.isInitialized) return
+        val selected = prefs.selectedPlanet
+        if (selected.equals("all", ignoreCase = true)) return
+        if (selected.equals("Sun", ignoreCase = true)) {
+            camera.trackTarget(sun.position)
+            return
+        }
+        val target = planets.find { it.config.name.equals(selected, ignoreCase = true) }
+        if (target != null) {
+            camera.trackTarget(target.worldPosition)
+        }
+    }
+
     override fun onSharedPreferenceChanged(prefs: SharedPreferences?, key: String?) {
         Log.d(TAG, "Preference changed: $key")
+        if (key == "selected_planet") {
+            pendingPlanetUpdate = true
+        }
     }
 
     fun release() {

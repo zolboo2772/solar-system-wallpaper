@@ -7,6 +7,13 @@ import androidx.preference.PreferenceManager
 class WallpaperPreferences(context: Context) {
     private val prefs: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
 
+    var selectedPlanet: String
+        get() = prefs.getString("selected_planet", "Earth") ?: "Earth"
+        set(value) {
+            prefs.edit().putString("selected_planet", value).apply()
+        }
+
+    val unlockZoomEffect: Boolean get() = prefs.getBoolean("unlock_zoom_effect", true)
     val quality: String get() = prefs.getString("quality", "high") ?: "high"
     val orbitSpeedMultiplier: Float get() = prefs.getInt("orbit_speed", 50) / 50f
     val autoRotate: Boolean get() = prefs.getBoolean("auto_rotate", true)

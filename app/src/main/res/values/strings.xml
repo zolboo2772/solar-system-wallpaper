@@ -17,4 +17,8 @@
     <string name="quality_low">Low</string>
     <string name="quality_medium">Medium</string>
     <string name="quality_high">High</string>
+    <string name="pref_planet_title">Focus Planet</string>
+    <string name="pref_planet_summary">Choose which planet to showcase or view the full Solar System</string>
+    <string name="pref_unlock_zoom_title">Unlock Fly-In Zoom</string>
+    <string name="pref_unlock_zoom_summary">Smooth Super Wallpaper zoom-in transition when unlocking your phone</string>
 </resources>

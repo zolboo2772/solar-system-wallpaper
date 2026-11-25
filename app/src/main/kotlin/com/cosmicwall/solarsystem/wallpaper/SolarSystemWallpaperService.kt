@@ -70,6 +70,9 @@ class SolarSystemWallpaperService : WallpaperService() {
             super.onVisibilityChanged(visible)
             if (visible) {
                 glSurfaceView?.onResume()
+                glSurfaceView?.queueEvent {
+                    renderer?.onWallpaperUnlocked()
+                }
             } else {
                 glSurfaceView?.onPause()
             }

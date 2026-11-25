@@ -30,7 +30,8 @@ class TouchHandler(
                 e.x, e.y, camera, planets
             )
             if (tappedPlanet != null) {
-                camera.focusOnTarget(tappedPlanet.worldPosition)
+                val focusDist = if (tappedPlanet.config.name == "Saturn") 2.8f else tappedPlanet.config.radius * 4.3f
+                camera.focusOnTarget(tappedPlanet.worldPosition, focusDist)
                 onPlanetTapped?.invoke(tappedPlanet)
             }
             return true

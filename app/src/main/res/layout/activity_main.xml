@@ -14,8 +14,8 @@
     <!-- Bottom gradient so buttons and text stand out clearly -->
     <View
         android:layout_width="match_parent"
-        android:layout_height="220dp"
-        android:background="#AA000008"
+        android:layout_height="290dp"
+        android:background="#BB000008"
         app:layout_constraintBottom_toBottomOf="parent" />
 
     <LinearLayout
@@ -23,43 +23,63 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:gravity="center"
-        android:padding="24dp"
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp"
+        android:paddingTop="12dp"
+        android:paddingBottom="24dp"
         app:layout_constraintBottom_toBottomOf="parent">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="☀️ Solar System 3D"
-            android:textSize="26sp"
+            android:textSize="24sp"
             android:textColor="#FFFFFFFF"
             android:textStyle="bold"
-            android:layout_marginBottom="4dp" />
+            android:layout_marginBottom="2dp" />
 
         <TextView
+            android:id="@+id/tvSubtitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Interactive Live Wallpaper"
-            android:textSize="14sp"
+            android:text="Drag to orbit • Pinch to zoom • Tap a planet below"
+            android:textSize="13sp"
             android:textColor="#B3FFFFFF"
-            android:layout_marginBottom="20dp" />
+            android:layout_marginBottom="12dp" />
+
+        <HorizontalScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:scrollbars="none"
+            android:layout_marginBottom="14dp">
+
+            <com.google.android.material.chip.ChipGroup
+                android:id="@+id/chipGroupPlanets"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:singleSelection="true"
+                app:selectionRequired="true"
+                app:singleLine="true" />
+
+        </HorizontalScrollView>
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnSetWallpaper"
             android:layout_width="match_parent"
-            android:layout_height="56dp"
+            android:layout_height="52dp"
             android:text="@string/set_wallpaper"
             android:textSize="16sp"
-            app:cornerRadius="28dp"
-            android:layout_marginBottom="12dp" />
+            app:cornerRadius="26dp"
+            android:layout_marginBottom="10dp" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnSettings"
             android:layout_width="match_parent"
-            android:layout_height="48dp"
+            android:layout_height="46dp"
             android:text="@string/open_settings"
             android:textSize="14sp"
             style="@style/Widget.Material3.Button.OutlinedButton"
-            app:cornerRadius="24dp"
+            app:cornerRadius="23dp"
             app:strokeColor="#80FFFFFF" />
 
     </LinearLayout>
